@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Théorie - Design Patterns</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Design Patterns - Théorie</h1>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+            <h2>Patterns Créationnels</h2>
+            
+            <h3>Factory Method</h3>
+            <p><strong>But :</strong> Déléguer la création d'objets aux sous-classes.</p>
+            <p><strong>Indices :</strong> Classe abstraite avec méthode abstraite de création, return new ConcreteProduct</p>
+            
+            <h3>Singleton</h3>
+            <p><strong>But :</strong> Une seule instance pour toute l'application.</p>
+            <p><strong>Indices :</strong> Constructeur private, getInstance(), instance static</p>
+
+            <hr>
+
+            <h2>Patterns Comportementaux</h2>
+            
+            <h3>Chain of Responsibility</h3>
+            <p><strong>But :</strong> Passer une requête le long d'une chaîne de handlers.</p>
+            <p><strong>Indices :</strong> Attribut successeur, if traite else passe au suivant, null à la fin</p>
+            
+            <h3>Command</h3>
+            <p><strong>But :</strong> Encapsuler une action dans un objet.</p>
+            <p><strong>Indices :</strong> Interface Command, execute(), liste de commandes, exécution différée</p>
+
+            <h3>Observer</h3>
+            <p><strong>But :</strong> Notifier automatiquement des objets quand un état change.</p>
+            <p><strong>Indices :</strong> attach(), detach(), notify(), Liste d'observers</p>
+
+            <h3>State</h3>
+            <p><strong>But :</strong> Changer le comportement selon l'état.</p>
+            <p><strong>Indices :</strong> Attribut state, délégation state.method(), changement d'état</p>
+
+            <h3>Strategy</h3>
+            <p><strong>But :</strong> Algorithmes interchangeables.</p>
+            <p><strong>Indices :</strong> Attribut strategy, injection dans constructeur</p>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>

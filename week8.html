@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 8 - Chain of Responsibility & Factory Method</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default'
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 8</h1>
+            <p>Chain of Responsibility + Factory Method</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+            <h2>Exercice : Validation Cartes de Crédit</h2>
+            
+            <p><strong>Description de l'exos 8 :</strong> Un restaurant accepte les paiements par carte de crédit (Visa, MasterCard, AmEx, Diners, Discover).</p>
+            
+            <p><strong>Patterns utilisés :</strong></p>
+            <ul>
+                <li>Factory Method → Créer l'objet carte</li>
+                <li>Chain of Responsibility → Valider le numéro</li>
+            </ul>
+
+            <hr>
+
+
+
+            <section>
+                <h2>Factory Method Pattern</h2>
+                <h3>Théorie</h3>
+                <h4>Comment le reconnaître ?</h4>
+                <p>
+                    Je reconnais <strong>Factory Method</strong> grâce à une classe abstraite qui déclare des méthodes abstraites. Les ConcreteCreator (enfants) implémentent ces méthodes en créant et retournant des ConcreteProduct spécifiques.
+                </p>
+                <figure style="text-align:center;">
+                    <img src="assets/th/FactoryMethod.png" alt="Factory Method UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Factory Method (Théorie)</figcaption>
+                </figure>
+                <h3>Exercice</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/FactoryMethod.png" alt="Factory Method UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Factory Method (Exercice)</figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h2>Chain of Responsibility Pattern</h2>
+                <h3>Théorie</h3>
+                <h4>Comment le reconnaître ?</h4>
+                <p>
+                    Je reconnais <strong>Chain of Responsibility</strong> grâce à l'attribut <em>successeur</em> et la construction <code>new Handler1(new Handler2(null))</code>. Ce n'est PAS comme Decorator car la chaîne finit par <code>null</code>, et la classe s'auto-appelle via <code>successeur.method()</code>. Le constructeur appelle <code>super(successeur)</code>.
+                </p>
+                <figure style="text-align:center;">
+                    <img src="assets/th/chainOfResponsibility.png" alt="Chain of Responsibility UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Chain of Responsibility (Théorie)</figcaption>
+                </figure>
+                <h3>Exercice</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/ChainOfResponsability.png" alt="Chain of Responsibility UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Chain of Responsibility (Exercice)</figcaption>
+                </figure>
+            </section>
+
+            <hr>
+
+            <h2>Code Principal</h2>
+
+            <h3>Generateur (Handler + Creator)</h3>
+            <pre><code>public abstract class Generateur {
+    private Generateur successeur;
+    
+    public Generateur(Generateur successeur) {
+        this.successeur = successeur;
+    }
+    
+    public CarteDeCredit traiterCarte(String numero, 
+                                      Calendar dateExpiration, 
+                                      String nom) {
+        if (valider(numero)) {
+            return creerCarte(numero, dateExpiration, nom);
+        } else if (successeur != null) {
+            return successeur.traiterCarte(numero, dateExpiration, nom);
+        }
+        return null;
+    }
+    
+    public abstract boolean valider(String numero);
+    public abstract CarteDeCredit creerCarte(String numero, 
+                                             Calendar dateExpiration, 
+                                             String nom);
+}</code></pre>
+
+            <h3>VisaGenerator (ConcreteHandler + ConcreteCreator)</h3>
+            <pre><code>public class VisaGenerator extends Generateur {
+    
+    public VisaGenerator(Generateur successeur) {
+        super(successeur);
+    }
+    
+    @Override
+    public boolean valider(String numero) {
+        return numero.startsWith("4") && numero.length() == 16;
+    }
+    
+    @Override
+    public CarteDeCredit creerCarte(String numero, 
+                                    Calendar dateExpiration, 
+                                    String nom) {
+        return new Visa(numero, dateExpiration, nom);
+    }
+}</code></pre>
+
+            <h3>MainClient</h3>
+            <pre><code>public class MainClient {
+    public static void main(String[] args) {
+        // Construire la chaîne
+        Generateur chain = new VisaGenerator(
+            new MasterCardGenerator(
+                new AmexGenerator(
+                    new DinnersGenerator(
+                        new DiscoverGenerator(null)
+                    )
+                )
+            )
+        );
+        
+        // Utiliser la chaîne
+        CarteDeCredit carte = chain.traiterCarte(numero, date, nom);
+        
+        if (carte == null) {
+            System.out.println("Carte invalide");
+        } else {
+            System.out.println("Carte : " + carte.getType());
+        }
+    }
+}</code></pre>
+
+            <hr>
+
+            <h2>Points Clés</h2>
+
+            <h3>Factory Method</h3>
+            <ul>
+                <li>Classe abstraite avec méthode abstraite creerCarte()</li>
+                <li>Chaque générateur crée SON objet (Visa, AmEx, etc.)</li>
+                <li>return new ConcreteProduct(...)</li>
+            </ul>
+
+            <h3>Chain of Responsibility</h3>
+            <ul>
+                <li>Attribut successeur dans la classe abstraite</li>
+                <li>Constructeur prend le successeur en paramètre</li>
+                <li>if (valider()) traite, else successeur.traite()</li>
+                <li>null à la fin de la chaîne</li>
+            </ul>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>
