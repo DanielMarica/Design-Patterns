@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 3A - Exo A</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 3A</h1>
+            <p>Exercice A</p>
+        </header>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="week3.html">Retour Semaine 3</a>
+        </nav>
+        <main>
+        
+      
+            <h2>Exercice A</h2>
+
+            <section>
+                <h3>Diagramme Abstract Factory (Exercice)</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/AbstractFactory.png" alt="Abstract Factory UML Diagram" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Abstract Factory</figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h3>Code Principal - Abstract Factory</h3>
+                
+                <h3>1. L'Interface Factory (Le Moteur)</h3>
+                <p>C'est le contrat que toutes les usines doivent respecter.</p>
+                <pre><code>package ex3A.AbastractFactory;
+
+public interface ProduitFactory {
+  Produit creerProduit(String name, int anneeDeParution);
+}</code></pre>
+
+                <h3>2. Les Factories Concrètes</h3>
+                <p>Elles décident quel objet spécifique instancier (Livre ou DVD).</p>
+                <pre><code>// --- Usine à Livres ---
+public class LivreFactory implements ProduitFactory {
+    @Override
+    public Produit creerProduit(String name, int anneeDeParution) {
+        return new Livre(name, anneeDeParution);
+    }
+}
+
+// --- Usine à DVD ---
+public class DVDFactory implements ProduitFactory {
+    @Override
+    public Produit creerProduit(String name, int anneeDeParution) {
+        return new DVD(name, anneeDeParution);
+    }
+}</code></pre>
+
+                <h3>3. Le Magasin (Composition)</h3>
+                <p>Il est générique. Il utilise l'interface injectée.</p>
+                <pre><code>public class Magasin {
+  private Map&lt;String, Produit&gt; stock = new HashMap&lt;&gt;();
+  private ProduitFactory factory;
+
+  // Injection : On passe le cerveau (la factory) ici
+  public Magasin(ProduitFactory factory) {
+    this.factory = factory;
+  }
+
+  public void ajouterProduit(String name, int anneeDeParution) {
+    Produit produit = factory.creerProduit(name, anneeDeParution);
+    stock.put(name, produit);
+  }
+}</code></pre>
+
+                <h3>4. Main (Utilisation)</h3>
+                <p>On configure le <strong>même objet</strong> Magasin avec différents moteurs.</p>
+                <pre><code>// Configuration A : Le magasin vend des Livres
+ProduitFactory factoryLivre = new LivreFactory();
+Magasin monMagasin = new Magasin(factoryLivre);
+monMagasin.ajouterProduit("Le Petit Prince", 1943);
+
+// Configuration B : Le MÊME magasin vend des DVD (changement de factory)
+ProduitFactory factoryDVD = new DVDFactory();
+monMagasin = new Magasin(factoryDVD); 
+monMagasin.ajouterProduit("Inception", 2010);</code></pre>
+            </section>
+
+
+            <section>
+                <h3>Diagramme Factory Method (Exercice)</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/Factorymethod8.png" alt="Factory Method UML Diagram" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Factory Method</figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h3>Code Principal - Factory Method</h3>
+
+                <h3>1. La Classe Créateur Abstraite</h3>
+                <p>Elle définit la logique globale mais laisse une méthode <code>abstract</code> pour la création. C'est le "squelette".</p>
+                <pre><code>package ex3A.FactoryMethod;
+import java.util.HashMap;
+import java.util.Map;
+
+public abstract class CreatorMagasins {
+
+  private Map&lt;String,Produit&gt; etagere = new HashMap&lt;&gt;();
+
+  // LA Factory Method (Abstraite) : Les enfants devront décider
+  public abstract Produit creerProduit(String name, int anneeParution);
+
+  public void ajouterLivre(String name, int anneeDeParution){
+    // Appel à la méthode abstraite (polymorphisme)
+    Produit livre = creerProduit(name, anneeDeParution);
+    etagere.put(name,livre);
+  }
+}</code></pre>
+
+                <h3>2. Les Créateurs Concrets (Héritage)</h3>
+                <p>Ici, on est OBLIGÉ de créer des classes différentes pour chaque type de produit.</p>
+                <pre><code>// --- Le Magasin SPÉCIALISÉ Livres ---
+package ex3A.FactoryMethod;
+
+public class ConcreteCreatorMagasinDeLivre extends CreatorMagasins {
+    @Override
+    public Produit creerProduit(String name, int anneeParution) {
+        // La décision est codée en dur ici
+        return new Livre(name, anneeParution);
+    }
+}
+
+// --- Le Magasin SPÉCIALISÉ DVD ---
+package ex3A.FactoryMethod;
+
+public class ConcreteCreatorMagasinDeDVD extends CreatorMagasins {
+    @Override
+    public Produit creerProduit(String name, int anneeParution) {
+        // La décision est codée en dur ici
+        return new DVD(name, anneeParution);
+    }
+}</code></pre>
+
+                <h3>3. Main (Utilisation)</h3>
+                <p>Contrairement à l'Abstract Factory, ici on instancie des <strong>classes différentes</strong> (Rupture).</p>
+                <pre><code>package ex3A.FactoryMethod;
+
+public class Main {
+  public static void main(String[] args) {
+
+    // CAS 1 : Magasin de DVD (Classe spécifique)
+    ConcreteCreatorMagasinDeDVD magasinDvd = new ConcreteCreatorMagasinDeDVD();
+    System.out.println("--- Utilisation du Magasin de DVD ---");
+    
+    Produit p1 = magasinDvd.creerProduit("Inception", 2010);
+    System.out.println("Créé : " + p1.getName());
+
+
+    // CAS 2 : Magasin de Livre (Nouvelle Classe obligatoire)
+    ConcreteCreatorMagasinDeLivre magasinLivre = new ConcreteCreatorMagasinDeLivre();
+    System.out.println("\n--- Utilisation du Magasin de Livre ---");
+    
+    Produit p2 = magasinLivre.creerProduit("Le Petit Prince", 1943);
+    System.out.println("Créé : " + p2.getName());
+  }
+}</code></pre>
+            </section>
+
+            <section>
+                <h3>Abstract Factory vs Factory Method : La Preuve par la Console</h3>
+                
+                <div style="background-color: #e8f5e9; padding: 15px; margin-bottom: 20px; border-left: 5px solid #4caf50;">
+                    <h4>1. Abstract Factory (Composition)</h4>
+                    <p><em>On garde la même instance de classe, on change juste sa configuration.</em></p>
+                    <pre style="background-color: #1e1e1e; color: #4caf50;">
+=== AVANTAGE ABSTRACT FACTORY : Un Magasin Commun ===
+Magasin configuré Livres -> Le Petit Prince
+Magasin configuré DVD    -> Inception</pre>
+                    <p><strong>Analyse :</strong> C'est la <strong>CONTINUITÉ</strong>. Le code montre un seul bloc logique. Le <code>Magasin</code> est une coquille vide qui accepte n'importe quel moteur.</p>
+                </div>
+
+                <div style="background-color: #ffebee; padding: 15px; margin-bottom: 20px; border-left: 5px solid #f44336;">
+                    <h4>2. Factory Method (Héritage)</h4>
+                    <p><em>On est obligé de détruire l'objet précédent et d'en créer un nouveau d'une autre classe.</em></p>
+                    <pre style="background-color: #1e1e1e; color: #f44336;">
+--- Utilisation du Magasin de DVD ---
+Création réussie : Inception
+
+--- Utilisation du Magasin de Livre ---
+Création réussie : Le Petit Prince</pre>
+                    <p><strong>Analyse :</strong> C'est la <strong>RUPTURE</strong>. Le code montre deux blocs séparés. On ne peut pas transformer un <code>MagasinDeDVD</code> en <code>MagasinDeLivre</code>, il faut changer de voiture.</p>
+                </div>
+
+                <h3>Résumé Flash</h3>
+                <ul>
+                    <li><strong>Abstract Factory</strong> = <code>new Magasin(new Factory())</code> <br>👉 Tu changes le <strong>moteur</strong> (paramètre).</li>
+                    <li><strong>Factory Method</strong> = <code>new MagasinSpecialise()</code> <br>👉 Tu changes la <strong>voiture</strong> (classe).</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

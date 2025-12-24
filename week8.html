@@ -45,7 +45,7 @@
                 <h3>Théorie</h3>
                 <h4>Comment le reconnaître ?</h4>
                 <p>
-                    Je reconnais <strong>Factory Method</strong> grâce à une classe abstraite qui déclare des méthodes abstraites. Les ConcreteCreator (enfants) implémentent ces méthodes en créant et retournant des ConcreteProduct spécifiques.
+                    Je reconnais <strong>Factory Method</strong> car c'est un cas particulier de Template Method où la méthode abstraite fait un <code>new</code>. Il y a une classe abstraite avec une méthode abstraite de création, et les ConcreteCreator implémentent en faisant <code>return new ConcreteProduct()</code>.
                 </p>
                 <figure style="text-align:center;">
                     <img src="assets/th/FactoryMethod.png" alt="Factory Method UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
@@ -53,7 +53,7 @@
                 </figure>
                 <h3>Exercice</h3>
                 <figure style="text-align:center;">
-                    <img src="assets/exos/FactoryMethod.png" alt="Factory Method UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <img src="assets/exos/Factorymethod8.png" alt="Factory Method UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
                     <figcaption>Figure : Diagramme UML du pattern Factory Method (Exercice)</figcaption>
                 </figure>
             </section>
@@ -63,7 +63,7 @@
                 <h3>Théorie</h3>
                 <h4>Comment le reconnaître ?</h4>
                 <p>
-                    Je reconnais <strong>Chain of Responsibility</strong> grâce à l'attribut <em>successeur</em> et la construction <code>new Handler1(new Handler2(null))</code>. Ce n'est PAS comme Decorator car la chaîne finit par <code>null</code>, et la classe s'auto-appelle via <code>successeur.method()</code>. Le constructeur appelle <code>super(successeur)</code>.
+                    Je reconnais <strong>Chain of Responsibility</strong> grâce à l'attribut <strong>successeur</strong> du même type que la classe et la construction <code>new Handler1(new Handler2(null))</code> qui finit par <code>null</code> (PAS un component !). La classe s'auto-appelle via <code>successeur.method()</code>, le constructeur appelle <code>super(successeur)</code>, et on teste <code>if (traite)</code> sinon passe au suivant.
                 </p>
                 <figure style="text-align:center;">
                     <img src="assets/th/chainOfResponsibility.png" alt="Chain of Responsibility UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">

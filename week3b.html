@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 3B - Decorator Pattern</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 3B - Decorator Pattern</h1>
+            <p>Exercice Café + Additifs</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+            <h2>🎨 Pattern Decorator</h2>
+            
+            <h3>📋 Description de l'exercice</h3>
+            <p>Un système de café où on peut ajouter des additifs (lait, sucre, crème) de manière flexible.</p>
+            <p><strong>Problème :</strong> Comment ajouter dynamiquement des fonctionnalités (additifs) à un café sans créer des centaines de classes ?</p>
+            
+            <hr>
+            
+            <h3>✅ Comment reconnaître Decorator</h3>
+            
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>1. Une classe implémente une interface ET contient un attribut de cette même interface</strong></p>
+                <pre>public abstract class Additif implements Boisson {
+    private Boisson boisson;  // ← MÊME type
+}</pre>
+                
+                <p><strong>2. Construction en couches qui finit par le component de base</strong></p>
+                <pre>Boisson b = new Lait(new Sucre(new Decafeine()));
+//          Decorator  Decorator  Component (PAS null)</pre>
+                
+                <p><strong>3. Chaque décorateur ajoute une fonctionnalité</strong></p>
+                <pre>public double prix() {
+    return 0.10 + super.prix();  // ← AJOUTE 0.10
+}</pre>
+            </div>
+
+            <hr>
+
+            <h3>📊 Structure du pattern</h3>
+            
+            <p><strong>Component :</strong> Boisson (interface)</p>
+            <p><strong>ConcreteComponent :</strong> Cafe → Decafeine, Moka, Dessert</p>
+            <p><strong>Decorator :</strong> Additif (abstract)</p>
+            <p><strong>ConcreteDecorator :</strong> Lait, Sucre, Creme</p>
+
+            <hr>
+
+            <h3>💻 Code principal</h3>
+
+            <h4>Component (interface)</h4>
+            <pre>public interface Boisson {
+    public String getNom(); 
+    public double prix();
+}</pre>
+
+            <h4>ConcreteComponent</h4>
+            <pre>public class Decafeine extends Cafe {
+    public Decafeine() {
+        super("décaféiné");
+    }
+    
+    public double prix() { 
+        return 0.40;  // Prix de base
+    }
+}</pre>
+
+            <h4>Decorator (abstract)</h4>
+            <pre>public abstract class Additif implements Boisson {
+    private Boisson boisson;  // ← Contient Boisson
+    
+    public Additif(Boisson boisson) { 
+        this.boisson = boisson;
+    }
+    
+    public double prix() {
+        return boisson.prix();  // ← Délègue
+    }
+    
+    public String toString() {
+        return boisson.toString();
+    }
+}</pre>
+
+            <h4>ConcreteDecorator</h4>
+            <pre>public class Lait extends Additif {
+    public Lait(Boisson boisson) { 
+        super(boisson);
+    }
+    
+    public double prix() {
+        return 0.10 + super.prix();  // ← AJOUTE 0.10
+    }
+    
+    public String toString() {
+        return super.toString() + " au lait";  // ← AJOUTE texte
+    }
+}</pre>
+
+            <h4>Utilisation (Main)</h4>
+            <pre>public class Main {
+    public static void main(String[] args) {
+        // Café décaféiné avec sucre et lait
+        Boisson b = new Lait(new Sucre(new Decafeine()));
+        System.out.println(b + " au prix de " + b.prix() + " euros.");
+        // Résultat : "Café décaféiné sucré au lait au prix de 0.55 euros"
+        
+        // Café dessert avec crème et sucre
+        b = new Sucre(new Creme(new Dessert()));
+        System.out.println(b + " au prix de " + b.prix() + " euros.");
+        // Résultat : "Café dessert crème sucré au prix de 0.57 euros"
+    }
+}</pre>
+
+            <hr>
+
+            <h3>🔄 Flow d'exécution</h3>
+            
+            <pre>Boisson b = new Lait(new Sucre(new Decafeine()));
+                               └─ 0.40 (Decafeine)
+                         └─ 0.40 + 0.05 = 0.45 (Sucre)
+                   └─ 0.45 + 0.10 = 0.55 (Lait)
+
+b.prix() → Lait.prix()
+             → 0.10 + super.prix()
+                       → Sucre.prix()
+                            → 0.05 + super.prix()
+                                      → Decafeine.prix()
+                                           → 0.40</pre>
+
+            <hr>
+
+            <h3>📊 Tableaux de correspondance</h3>
+
+            <h4>Tableau 1 : Participants théoriques → Noms dans le code</h4>
+            <table>
+                <tr>
+                    <th>Participants théoriques</th>
+                    <th>Noms dans le code</th>
+                </tr>
+                <tr>
+                    <td>Component</td>
+                    <td>Boisson (interface)</td>
+                </tr>
+                <tr>
+                    <td>ConcreteComponent</td>
+                    <td>Cafe (abstract) → Decafeine, Moka, Dessert</td>
+                </tr>
+                <tr>
+                    <td>Decorator</td>
+                    <td>Additif (abstract)</td>
+                </tr>
+                <tr>
+                    <td>ConcreteDecorator</td>
+                    <td>Lait, Sucre, Creme</td>
+                </tr>
+            </table>
+
+            <h4>Tableau 2 : Méthodes théoriques → Méthodes dans le code</h4>
+            <table>
+                <tr>
+                    <th>Méthodes théoriques</th>
+                    <th>Méthodes dans le code</th>
+                </tr>
+                <tr>
+                    <td>operation()</td>
+                    <td>prix(), toString()</td>
+                </tr>
+            </table>
+
+            <hr>
+
+            <h3>🔍 Indices du pattern Decorator</h3>
+            
+            <ul>
+                <li>✅ Classe implémente interface ET contient attribut de cette interface</li>
+                <li>✅ <code>private Boisson boisson</code> (même type)</li>
+                <li>✅ Construction <code>new Decorator(new Decorator(component))</code></li>
+                <li>✅ Finit par component de base (PAS null)</li>
+                <li>✅ <code>super.method()</code> + ajout</li>
+                <li>✅ Ajoute des fonctionnalités dynamiquement</li>
+            </ul>
+
+            <hr>
+
+            <h3>⚠️ Ne pas confondre avec Chain of Responsibility</h3>
+            
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Decorator</th>
+                    <th>Chain of Responsibility</th>
+                </tr>
+                <tr>
+                    <td><strong>Finit par</strong></td>
+                    <td>Component de base</td>
+                    <td>null</td>
+                </tr>
+                <tr>
+                    <td><strong>But</strong></td>
+                    <td>Ajouter fonctionnalités</td>
+                    <td>Traiter une requête</td>
+                </tr>
+                <tr>
+                    <td><strong>Exemple</strong></td>
+                    <td>new Lait(new Decafeine())</td>
+                    <td>new Handler(null)</td>
+                </tr>
+            </table>
+
+            <hr>
+
+            <h3>💡 Points clés</h3>
+            
+            <p><strong>Avantages du Decorator :</strong></p>
+            <ul>
+                <li>Ajouter des fonctionnalités sans modifier les classes existantes</li>
+                <li>Combinaisons flexibles (Lait + Sucre, ou Crème + Sucre, etc.)</li>
+                <li>Respecte le principe Open/Closed</li>
+            </ul>
+
+            <p><strong>Quand l'utiliser :</strong></p>
+            <ul>
+                <li>Besoin d'ajouter des responsabilités dynamiquement</li>
+                <li>Éviter l'explosion de sous-classes</li>
+                <li>Combinaisons multiples possibles</li>
+            </ul>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -18,39 +18,107 @@
         </nav>
 
         <main>
-            <h2>Patterns Créationnels</h2>
+            <h2>🤔 Les 3 Questions Fondamentales</h2>
             
-            <h3>Factory Method</h3>
-            <p><strong>But :</strong> Déléguer la création d'objets aux sous-classes.</p>
-            <p><strong>Indices :</strong> Classe abstraite avec méthode abstraite de création, return new ConcreteProduct</p>
-            
-            <h3>Singleton</h3>
-            <p><strong>But :</strong> Une seule instance pour toute l'application.</p>
-            <p><strong>Indices :</strong> Constructeur private, getInstance(), instance static</p>
+            <div style="background-color: #fafafa; border: 2px solid #333; padding: 20px; margin: 20px 0;">
+                <h3>Pose-toi la question : Quel est le problème fondamental ?</h3>
+                
+                <p><strong>1. Est-ce que c'est difficile de CRÉER l'objet ?</strong></p>
+                <p>→ OUI → Pattern <strong>CRÉATIONNEL</strong></p>
+                
+                <p><strong>2. Est-ce que je dois ASSEMBLER des classes bizarres pour qu'elles s'emboîtent ?</strong></p>
+                <p>→ OUI → Pattern <strong>STRUCTUREL</strong></p>
+                
+                <p><strong>3. Est-ce que c'est un problème de COMMUNICATION entre objets ?</strong></p>
+                <p>→ OUI → Pattern <strong>COMPORTEMENTAL</strong></p>
+            </div>
 
             <hr>
 
-            <h2>Patterns Comportementaux</h2>
+            <h2>🏭 Patterns CRÉATIONNELS (Instancier les objets)</h2>
             
-            <h3>Chain of Responsibility</h3>
-            <p><strong>But :</strong> Passer une requête le long d'une chaîne de handlers.</p>
-            <p><strong>Indices :</strong> Attribut successeur, if traite else passe au suivant, null à la fin</p>
+            <h3>Factory Method</h3>
+            <p><strong>Comment le reconnaître :</strong> Classe abstraite avec méthode abstraite de création. Les ConcreteCreator implémentent en faisant "return new ConcreteProduct". C'est un cas particulier de Template Method où la méthode abstraite fait un new.</p>
+            
+            <h3>Abstract Factory</h3>
+            <p><strong>Comment le reconnaître :</strong> Interface avec plusieurs méthodes de création (createProductA, createProductB). Chaque ConcreteFactory crée une famille d'objets liés.</p>
+            
+            <h3>Singleton</h3>
+            <p><strong>Comment le reconnaître :</strong> Constructeur private, méthode getInstance(), attribut static instance. Une seule instance pour toute l'application.</p>
+            
+            <h3>Builder</h3>
+            <p><strong>Comment le reconnaître :</strong> Méthodes chainables (retournent this), construction progressive, méthode build() finale. Utile pour objets avec beaucoup de paramètres optionnels.</p>
+            
+            <h3>Prototype</h3>
+            <p><strong>Comment le reconnaître :</strong> Méthode clone() ou copy(). Crée de nouveaux objets en copiant un prototype existant.</p>
+
+            <hr>
+
+            <h2>🔌 Patterns STRUCTURELS (Composition des classes et objets)</h2>
+            
+            <h3>Decorator</h3>
+            <p><strong>Comment le reconnaître :</strong> Une classe implémente une interface ET a un attribut de cette même interface. Construction en couches "new Decorator1(new Decorator2(component))" qui finit par le component de base (PAS null). Chaque décorateur ajoute une fonctionnalité.</p>
+            
+            <h3>Adapter</h3>
+            <p><strong>Comment le reconnaître :</strong> Une classe implémente une interface cible et contient un attribut de la classe à adapter. Convertit l'interface d'une classe en une autre interface attendue.</p>
+            
+            <h3>Composite</h3>
+            <p><strong>Comment le reconnaître :</strong> Une classe implémente une interface ET a un attribut qui est une collection sur cette interface (List&lt;Interface&gt;). Permet de traiter uniformément les objets individuels et les compositions.</p>
+            
+            <h3>Facade</h3>
+            <p><strong>Comment le reconnaître :</strong> Le projet contient plusieurs classes mais le main ne fait appel qu'à une seule classe (la Facade). Simplifie l'interface d'un système complexe.</p>
+            
+            <h3>Flyweight</h3>
+            <p><strong>Comment le reconnaître :</strong> Pool d'objets partagés, Factory pour récupérer les instances. Optimise la mémoire en partageant des objets similaires.</p>
+
+            <hr>
+
+            <h2>🎯 Patterns COMPORTEMENTAUX (Communication entre objets)</h2>
+            
+            <h3>Strategy</h3>
+            <p><strong>Comment le reconnaître :</strong> Attribut de type interface injecté dans le constructeur ou via setter. Délégation via "strategie.method()". Possibilité de changer de stratégie à l'exécution. Strategy a UNE SEULE méthode (sinon c'est Visitor).</p>
+            
+            <h3>Observer</h3>
+            <p><strong>Comment le reconnaître :</strong> Liste d'observers (List&lt;Observer&gt;), méthodes attach(), detach(), notify(). Boucle for qui appelle update() sur chaque observer. Notification automatique des changements.</p>
+            
+            <h3>State</h3>
+            <p><strong>Comment le reconnaître :</strong> Attribut état, les méthodes délèguent via "etat.method()". Changement d'état avec "etat = etat.method()". Attention à ne pas confondre avec Decorator : State change le comportement, Decorator ajoute des fonctionnalités.</p>
             
             <h3>Command</h3>
-            <p><strong>But :</strong> Encapsuler une action dans un objet.</p>
-            <p><strong>Indices :</strong> Interface Command, execute(), liste de commandes, exécution différée</p>
+            <p><strong>Comment le reconnaître :</strong> Interface Command avec méthode execute(). Liste de commandes. Exécution différée. Encapsule une action dans un objet. Utile pour undo/redo.</p>
+            
+            <h3>Chain of Responsibility</h3>
+            <p><strong>Comment le reconnaître :</strong> Attribut successeur du même type que la classe. Construction "new Handler1(new Handler2(null))" qui finit par null (PAS un component comme Decorator). La classe s'auto-appelle via "successeur.method()". Constructeur appelle "super(successeur)".</p>
+            
+            <h3>Visitor</h3>
+            <p><strong>Comment le reconnaître :</strong> Ressemble à Strategy MAIS avec PLUSIEURS méthodes (autant que de types de nœuds différents). Par exemple : visiterValeur(), visiterGroupe(). Strategy a UNE méthode, Visitor en a PLUSIEURS.</p>
+            
+            <h3>Template Method</h3>
+            <p><strong>Comment le reconnaître :</strong> Classe abstraite avec une méthode concrète qui appelle des méthodes abstraites. La méthode concrète définit le squelette de l'algorithme, les sous-classes implémentent les étapes variables.</p>
+            
+            <h3>Iterator</h3>
+            <p><strong>Comment le reconnaître :</strong> Interface avec hasNext() et next(). Permet de parcourir une collection sans exposer sa structure interne.</p>
 
-            <h3>Observer</h3>
-            <p><strong>But :</strong> Notifier automatiquement des objets quand un état change.</p>
-            <p><strong>Indices :</strong> attach(), detach(), notify(), Liste d'observers</p>
+            <hr>
 
-            <h3>State</h3>
-            <p><strong>But :</strong> Changer le comportement selon l'état.</p>
-            <p><strong>Indices :</strong> Attribut state, délégation state.method(), changement d'état</p>
-
-            <h3>Strategy</h3>
-            <p><strong>But :</strong> Algorithmes interchangeables.</p>
-            <p><strong>Indices :</strong> Attribut strategy, injection dans constructeur</p>
+            <h2>⚠️ Pièges à Éviter</h2>
+            
+            <div style="background-color: #fff3cd; border: 1px solid #856404; padding: 15px; margin: 20px 0;">
+                <h3>Decorator vs Chain of Responsibility</h3>
+                <p><strong>Decorator :</strong> Finit par le component de base</p>
+                <p><strong>Chain :</strong> Finit par null</p>
+                
+                <h3>Strategy vs Visitor</h3>
+                <p><strong>Strategy :</strong> UNE SEULE méthode</p>
+                <p><strong>Visitor :</strong> PLUSIEURS méthodes (une par type de nœud)</p>
+                
+                <h3>State vs Decorator</h3>
+                <p><strong>State :</strong> Change le comportement selon l'état</p>
+                <p><strong>Decorator :</strong> Ajoute des fonctionnalités</p>
+                
+                <h3>Template Method vs Factory Method</h3>
+                <p><strong>Factory Method :</strong> Cas particulier de Template Method où la méthode abstraite fait un new</p>
+            </div>
 
         </main>
 

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 7 - Patterns de Création & Structure</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Petit style pour le tableau de comparaison */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .comparison-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            border: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .comparison-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 7</h1>
+            <p>Builder + Decorator + Abstract Factory + Flyweight + Prototype</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+
+            <h2 id="builder">🏗️ PATTERN 1 : BUILDER</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Méthodes <strong>chainables</strong> qui retournent <code>this</code></li>
+                    <li>✅ Construction <strong>progressive</strong> (étape par étape)</li>
+                    <li>✅ Méthode finale <code>build()</code> ou <code>create()</code></li>
+                    <li>✅ Utile pour objets avec <strong>beaucoup de paramètres optionnels</strong></li>
+                    <li>✅ Évite les constructeurs avec 10+ paramètres</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Builder grâce aux méthodes chainables qui retournent <code>this</code>, la construction progressive, et la méthode finale <code>build()</code>."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Builder.png" alt="Diagramme Builder Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Builder.png" alt="Diagramme UML du pattern Builder (Exercice Robot)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Builder (Exercice Robot)</figcaption>
+            </figure>
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. L'Objet Complexe + Builder Interne (SimpleRobot.java)</h4>
+            <pre><code>package be.vinci.etudiant;
+
+public class SimpleRobot implements Robot {
+  // Attributs 'final' car l'objet est construit une seule fois
+  private final int shield;
+  private final int freq;
+  private int life;
+  private final String nom;
+  private final int canon;
+
+  // Constructeur PRIVE : seul le Builder peut l'utiliser
+  public SimpleRobot(RobotBuilder robotBuilder) {
+    this.shield = robotBuilder.shield;
+    this.freq = robotBuilder.freq;
+    this.nom = robotBuilder.name;
+    this.canon = robotBuilder.canon;
+    this.life = robotBuilder.life;
+  }
+
+  // ... Getters ...
+
+  // --- INNER CLASS STATIC : LE BUILDER ---
+  public static class RobotBuilder {
+    // Valeurs par défaut
+    public int canon = 1;
+    public int shield = 1;
+    public int freq = 100;
+    public int life = 100;
+    public String name;
+
+    public RobotBuilder(String name) {
+      this.name = name;
+    }
+
+    // Méthodes Fluent (Chainables) -> return this
+    public RobotBuilder setCanon(int canon) {
+      this.canon = canon;
+      return this;
+    }
+    public RobotBuilder setShield(int shield) {
+      this.shield = shield;
+      return this;
+    }
+    public RobotBuilder setFreq(int freq) {
+      this.freq = freq;
+      return this;
+    }
+    public RobotBuilder setLife(int life) {
+      this.life = life;
+      return this;
+    }
+    
+    // Méthode finale de construction
+    public Robot build(){
+      return new SimpleRobot(this);
+    }
+  }
+}</code></pre>
+
+            <h4>2. Le Client / Director (PatternRobots.java)</h4>
+            <pre><code>public class PatternRobots {
+    public static void main(String[] args) {
+        // Utilisation fluide du Builder
+        Robot robot1 = new SimpleRobot.RobotBuilder("Robot-1")
+                .setCanon(10)
+                .setShield(2)
+                .setFreq(100)
+                .setLife(100)
+                .build();
+
+        // Création d'un autre robot
+        Robot robot2 = new SimpleRobot.RobotBuilder("Robot-2")
+                .setCanon(9)
+                .setShield(3)
+                .setFreq(90)
+                .build();
+                
+        fight(robot1, robot2);
+    }
+}</code></pre>
+
+            <h2 id="decorator">🎨 PATTERN 2 : DECORATOR</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Classe implémente interface <strong>ET</strong> contient attribut de <strong>cette même interface</strong></li>
+                    <li>✅ Construction en couches : <code>new Decorator1(new Decorator2(component))</code></li>
+                    <li>✅ Finit par le <strong>component de base</strong> (PAS null !)</li>
+                    <li>✅ Chaque décorateur <strong>ajoute</strong> une fonctionnalité</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Decorator car il implémente une interface ET contient un attribut de cette même interface."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Decorator.png" alt="Diagramme Decorator" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Decoratorex7.png" alt="Diagramme UML du pattern Decorator (Exercice Robot)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Decorator (Exercice Robot)</figcaption>
+            </figure>
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. Le Décorateur Abstrait (Wrapper)</h4>
+            <p>Il implémente <code>Robot</code> ET contient un <code>Robot</code>. Il sert de base pour tous les autres décorateurs.</p>
+            <pre><code>package be.vinci.etudiant.Decorator;
+import be.vinci.etudiant.Robot;
+
+public class Decorator implements Robot {
+  private Robot robot; // L'objet décoré (Composition)
+
+  public Decorator(Robot robot) {
+    this.robot = robot;
+  }
+
+  // Délégation par défaut : on passe l'appel à l'objet interne
+  @Override
+  public int getCanon() { return robot.getCanon(); }
+  @Override
+  public int getShield() { return robot.getShield(); }
+  @Override
+  public int getFreq() { return robot.getFreq(); }
+  @Override
+  public String getName() { return robot.getName(); }
+  @Override
+  public int diffLife(int i) { return robot.diffLife(i); }
+}</code></pre>
+
+            <h4>2. Décorateurs Concrets (Exemples)</h4>
+            <p>Ils ajoutent ou modifient le comportement en appelant <code>super.methode()</code>.</p>
+            <pre><code>// --- LifeDecorator : Modifie la gestion de la vie ---
+public class LifeDecorator extends Decorator {
+  private final int coef;
+
+  public LifeDecorator(Robot robot, int coef) {
+    super(robot);
+    this.coef = coef;
+  }
+
+  @Override
+  public int diffLife(int i) {
+    // Modification du comportement avant d'appeler le parent
+    return super.diffLife(i/coef);
+  }
+}
+
+// --- ConcreteDecoratorBouclier : Modifie le canon (Exemple) ---
+public class ConcreteDecoratorBouclier extends Decorator {
+  private final int coef;
+
+  public ConcreteDecoratorBouclier(Robot robot, int coef) {
+    super(robot);
+    this.coef = coef;
+  }
+  
+  @Override
+  public int getCanon(){
+    return coef * super.getCanon();
+  }
+}</code></pre>
+
+            <h4>3. Utilisation (Main)</h4>
+            <p>On "emballe" le robot dans des couches de décorateurs.</p>
+            <pre><code>// Création du robot de base (Component)
+Robot robotBase = new SimpleRobot.RobotBuilder("Robot-1").build();
+
+// Ajout d'une couche Bouclier
+Robot robotAvecBouclier = new ConcreteDecoratorBouclier(robotBase, 4);
+
+// Ajout d'une couche Vie sur un autre robot
+Robot robot2 = new SimpleRobot.RobotBuilder("Robot-2").build();
+Robot robotAvecVie = new LifeDecorator(robot2, 4);</code></pre>
+
+
+            <h2 id="abstract-factory">🏭 PATTERN 3 : ABSTRACT FACTORY</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Interface avec <strong>une ou plusieurs méthodes de création</strong> abstraites.</li>
+                    <li>✅ Chaque <strong>ConcreteFactory</strong> crée une <strong>famille d'objets liés</strong> ou cohérents entre eux.</li>
+                    <li>✅ Le client ne connait que l'interface abstraite de la factory et des produits.</li>
+                    <li>✅ Dans cet exercice, les factories encapsulent la complexité du Builder et du Decorator.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Abstract Factory grâce à l'interface qui définit les méthodes de création, permettant aux sous-classes de décider quelle famille d'objets concrets instancier."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <p><em>(Le schéma théorique standard montre souvent plusieurs méthodes de création par factory)</em></p>
+             <img src="assets/th/asbtractFactory.png" alt="Diagramme Abstract Factory Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/ABstractFActoryexo7.png" alt="Diagramme UML du pattern Abstract Factory (Exercice Robot)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Abstract Factory (Exercice Robot)</figcaption>
+            </figure>
+
+            <h3>🧐 Comparaison Théorie vs Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Concept Théorique (Pattern)</th>
+                        <th>Nom dans l'Exercice</th>
+                        <th>Rôle dans l'exercice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Abstract Factory</strong><br>(Interface)</td>
+                        <td><code>AbstractFactory</code></td>
+                        <td>Définit le contrat <code>createRobot()</code> que toutes les usines doivent respecter.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Concrete Factory</strong><br>(Classe)</td>
+                        <td><code>TankFactory</code><br><code>GrosseBertaFactory</code><br><code>PicVertFactory</code></td>
+                        <td>Implémentent la méthode de création. Elles contiennent la "recette" spécifique (combinaison Builder + Decorator) pour créer un type de robot précis.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Abstract Product</strong><br>(Interface)</td>
+                        <td><code>Robot</code></td>
+                        <td>L'interface commune que tous les objets créés par les factories doivent implémenter.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Concrete Product</strong><br>(Classe)</td>
+                        <td>(Objets dynamiques)<br>Ex: <code>ConcreteDecoratorCanon</code></td>
+                        <td>Le résultat final retourné par la factory. Dans ce cas complexe, c'est souvent un robot de base "emballé" dans un décorateur.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Factory Method</strong><br>(Méthode)</td>
+                        <td><code>createRobot()</code></td>
+                        <td>La méthode abstraite dans l'interface, implémentée par les factories concrètes.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. L'Interface de la Factory Abstraite</h4>
+            <pre><code>package be.vinci.etudiant.AbstractFactory;
+import be.vinci.etudiant.Robot;
+
+public interface AbstractFactory {
+  // Le contrat : toute usine doit savoir créer un Robot
+  Robot createRobot();
+}</code></pre>
+
+            <h4>2. Les Factories Concrètes</h4>
+            <p>Chaque factory encapsule la logique complexe (Builder + Decorator) pour créer un type de robot prédéfini.</p>
+            <pre><code>// --- TankFactory : Crée un robot type "Tank" (canon moyen, bonne défense) ---
+package be.vinci.etudiant.AbstractFactory;
+import be.vinci.etudiant.Decorator.ConcreteDecoratorCanon;
+import be.vinci.etudiant.Robot;
+import be.vinci.etudiant.SimpleRobot.RobotBuilder;
+
+public class TankFactory implements AbstractFactory {
+  @Override
+  public Robot createRobot() {
+    // 1. Utilise le Builder pour la base
+    Robot base = new RobotBuilder("tank").setCanon(8).setLife(100).setShield(10).setFreq(90).build();
+    // 2. Utilise le Decorator pour améliorer le canon
+    return new ConcreteDecoratorCanon(base, 8);
+  }
+}
+
+// --- GrosseBertaFactory : Crée un robot type "Artillerie lourde" ---
+package be.vinci.etudiant.AbstractFactory;
+import be.vinci.etudiant.Decorator.ConcreteDecoratorCanon;
+import be.vinci.etudiant.Robot;
+import be.vinci.etudiant.SimpleRobot.RobotBuilder;
+
+public class GrosseBertaFactory implements AbstractFactory {
+  @Override
+  public Robot createRobot() {
+      Robot base = new RobotBuilder("grosse berta").setCanon(20).setLife(100).setShield(20).setFreq(50).build();
+    return new ConcreteDecoratorCanon(base, 20);
+  }
+}
+
+// --- PicVertFactory : Crée un robot type "Rapide et fragile" ---
+package be.vinci.etudiant.AbstractFactory;
+import be.vinci.etudiant.Decorator.LifeDecorator;
+import be.vinci.etudiant.Robot;
+import be.vinci.etudiant.SimpleRobot.RobotBuilder;
+
+public class PicVertFactory implements AbstractFactory {
+  @Override
+  public Robot createRobot() {
+     Robot base = new RobotBuilder("pic vert").setCanon(2).setLife(100).setShield(1).setFreq(200).build();
+     // Utilise un décorateur de vie différent ici
+    return new LifeDecorator(base, 1);
+  }
+}</code></pre>
+
+
+            <h2 id="flyweight">🪶 PATTERN 4 : FLYWEIGHT</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ <strong>Pool d'objets partagés</strong> (Map, cache, Hashtable)</li>
+                    <li>✅ <strong>Factory</strong> pour récupérer les instances via une CLÉ (String, ID...)</li>
+                    <li>✅ État <strong>intrinsèque</strong> (partagé/invariant) vs <strong>extrinsèque</strong> (unique/variant)</li>
+                    <li>✅ But : <strong>Optimiser la mémoire</strong> en évitant de créer des doublons.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Flyweight grâce au pool d'objets partagés (Hashtable) dans une Factory. On réutilise les objets existants au lieu d'en créer des nouveaux."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Flyweight.jpg" alt="Diagramme Flyweight Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Flyweight.png" alt="Diagramme UML du pattern Flyweight (Exercice Robot)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Flyweight (Exercice Robot)</figcaption>
+            </figure>
+
+            <h3>🧐 Comparaison Théorie vs Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Concept Théorique</th>
+                        <th>Nom dans l'Exercice</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>FlyweightFactory</strong><br>(Le Gestionnaire)</td>
+                        <td><code>AbstractFactoryFlyweigt</code></td>
+                        <td>C'est la classe qui contient la <code>Hashtable</code>. Elle gère le cache. Si on demande "tank", elle vérifie si l'usine Tank existe déjà avant de la retourner.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Flyweight</strong><br>(Interface Partagée)</td>
+                        <td><code>AbstractFactory</code></td>
+                        <td>C'est le type commun de tous les objets qu'on met dans le cache.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteFlyweight</strong><br>(Objet Partagé)</td>
+                        <td><code>TankFactory</code><br><code>PicVertFactory</code>...</td>
+                        <td>Ce sont les objets "lourds" ou répétitifs qu'on ne veut créer qu'une seule fois. Ici, on partage l'instance de l'usine elle-même.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Client</strong></td>
+                        <td><code>PatternRobots</code> (Main)</td>
+                        <td>Il configure le cache au démarrage (<code>put</code>) et demande des objets via la factory (<code>create</code>).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. La Factory avec Cache (FlyweightFactory)</h4>
+            <pre><code>package be.vinci.etudiant.AbstractFactory;
+
+import be.vinci.etudiant.Robot;
+import java.util.Hashtable;
+
+public class AbstractFactoryFlyweigt {
+    // LE CACHE : Stocke les instances uniques
+    private Hashtable&lt;String, AbstractFactory&gt; robots = new Hashtable&lt;&gt;();
+
+    // Enregistrement des prototypes/usines dans le cache
+    public void put(String name, AbstractFactory factory){
+        robots.put(name, factory);
+    }
+
+    // Récupération : on demande par le NOM (Clé)
+    // Pas de "new" ici, on récupère l'objet existant !
+    public Robot create(String name){
+        return robots.get(name).createRobot();
+    }
+}</code></pre>
+
+            <h4>2. Le Client (Main)</h4>
+            <pre><code>public class PatternRobots {
+    public static void main(String[] args) {
+        
+        System.out.println("------------------------ Flyweight ------------------------");
+        
+        // 1. Instanciation du gestionnaire
+        AbstractFactoryFlyweigt flyweightFactory = new AbstractFactoryFlyweigt();
+        
+        // 2. Remplissage du cache (On crée les usines UNE SEULE FOIS)
+        flyweightFactory.put("pic-vert", new PicVertFactory());
+        flyweightFactory.put("grosse-berta", new GrosseBertaFactory());
+        flyweightFactory.put("tank", new TankFactory());
+
+        // 3. Utilisation : On demande des robots par leur nom
+        // Le système réutilise l'usine stockée en mémoire
+        Robot r3 = flyweightFactory.create("tank");
+        Robot r4 = flyweightFactory.create("pic-vert");
+        
+        fight(r3, r4);
+    }
+}</code></pre>
+
+
+            <h2 id="prototype">🧬 PATTERN 5 : PROTOTYPE</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Méthode <code>clone()</code> ou <code>copy()</code></li>
+                    <li>✅ Crée de nouveaux objets en <strong>copiant un prototype</strong> existant</li>
+                    <li>✅ Implémente souvent l'interface <code>Cloneable</code></li>
+                    <li>✅ Permet de copier des objets complexes sans connaitre leur classe exacte.</li>
+                    <li>✅ <strong>Attention :</strong> Différence entre copie superficielle (Shallow) et copie profonde (Deep).</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Prototype grâce à la méthode <code>clone()</code> qui permet de dupliquer un objet existant."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Prototype.png" alt="Diagramme Prototype Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Prototype.png" alt="Diagramme UML du pattern Prototype (Exercice Robot)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Prototype (Exercice Robot)</figcaption>
+            </figure>
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. L'Interface avec Clonage (Robot.java)</h4>
+            <pre><code>public interface Robot extends Cloneable {
+    // ... autres méthodes ...
+    Robot clone(); // Le contrat de duplication
+}</code></pre>
+
+            <h4>2. Shallow Copy (Copie Superficielle) - SimpleRobot</h4>
+            <p>Pour les objets simples (champs primitifs ou immuables), <code>super.clone()</code> suffit.</p>
+            <pre><code>public class SimpleRobot implements Robot {
+    @Override
+    public Robot clone() {
+        try {
+            // Copie bit-à-bit des champs
+            return (Robot) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}</code></pre>
+
+            <h4>3. Deep Copy (Copie Profonde) - Decorator</h4>
+            <p><strong>CRUCIAL :</strong> Le décorateur contient un autre robot. Si on fait juste une copie simple, les deux décorateurs pointeraient vers le MÊME robot interne. Il faut cloner récursivement !</p>
+            <pre><code>public class Decorator implements Robot {
+    private Robot robot; // L'objet interne
+
+    @Override
+    public Robot clone() {
+        try {
+            // 1. On clone le décorateur lui-même
+            Decorator res = (Decorator) super.clone();
+            // 2. IMPORTANT : On clone aussi l'objet qu'il contient !
+            res.robot = this.robot.clone();
+            return res;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}</code></pre>
+
+            <h4>4. Le Registre de Prototypes (Main)</h4>
+            <p>On configure des robots "modèles" une fois, on les stocke, et on les clone à la demande.</p>
+            <pre><code>// 1. Création des modèles originaux
+Robot modelePicVert = new SimpleRobot.RobotBuilder("Pic Vert").setFreq(160).build();
+modelePicVert = new ConcreteDecoratorCanon(modelePicVert, 3);
+
+// 2. Stockage dans le registre
+PrototypeFlyweigt registre = new PrototypeFlyweigt();
+registre.put("pic-vert", modelePicVert);
+
+// 3. Clonage à la demande (On récupère une COPIE, pas l'original)
+Robot monNouveauRobot = registre.create("pic-vert");</code></pre>
+
+
+            <hr>
+
+            <h2>💡 Conseils Supplémentaires</h2>
+
+            <h3>⚠️ Pièges à éviter</h3>
+
+            <div style="background-color: #fff3cd; border: 1px solid #856404; padding: 15px; margin: 20px 0;">
+                <h4>Decorator vs Chain of Responsibility</h4>
+                <ul>
+                    <li><strong>Decorator :</strong> Finit par component → <code>new D(component)</code></li>
+                    <li><strong>Chain :</strong> Finit par null → <code>new H(null)</code></li>
+                </ul>
+
+                <h4>Factory Method vs Abstract Factory</h4>
+                <ul>
+                    <li><strong>Factory Method :</strong> UNE méthode de création, héritage pour changer le produit.</li>
+                    <li><strong>Abstract Factory :</strong> Souvent PLUSIEURS méthodes pour créer des familles de produits, composition (on injecte la factory). Dans cet exercice, elle est simplifiée à une méthode, mais le principe d'encapsuler la création de familles d'objets (Robot + ses Décorateurs) reste.</li>
+                </ul>
+                
+                <h4>Prototype vs Flyweight</h4>
+                <ul>
+                    <li><strong>Prototype :</strong> <code>clone()</code> → Crée une <strong>NOUVELLE instance</strong> (indépendante).</li>
+                    <li><strong>Flyweight :</strong> Cache → Renvoie la <strong>MÊME instance</strong> (partagée).</li>
+                </ul>
+            </div>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>

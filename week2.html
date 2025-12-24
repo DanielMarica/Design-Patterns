@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 2 - Strategy & Decorator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 2</h1>
+            <p>Strategy & Decorator</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+            <h2>Exercice : Patterns Strategy & Decorator</h2>
+            <p><strong>Description :</strong> Implémentation des patterns Strategy et Decorator pour illustrer la flexibilité des comportements et l'ajout dynamique de fonctionnalités.</p>
+            <p><strong>Patterns utilisés :</strong> Strategy, Decorator</p>
+            <hr>
+
+            <section>
+                <h2>Strategy Pattern</h2>
+                <h3>Théorie</h3>
+                <h4>Comment le reconnaître ?</h4>
+                <p>
+                    Je reconnais <strong>Strategy</strong> grâce à un attribut de type interface (ex : <code>private Parcourir strategie</code>) injecté dans le constructeur ou via un setter. La classe délègue via <code>strategie.method()</code>, on peut changer de stratégie à l'exécution, et <strong>Strategy a UNE seule méthode</strong> (sinon c'est Visitor avec plusieurs méthodes).
+                </p>
+                <figure style="text-align:center;">
+                    <img src="assets/th/strategy.png" alt="Strategy UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Strategy (Théorie)</figcaption>
+                </figure>
+                <h3>Exercice</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/strategy.png" alt="Strategy UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Strategy (Exercice)</figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h2>Decorator Pattern</h2>
+                <h3>Théorie</h3>
+                <h4>Comment le reconnaître ?</h4>
+                <p>
+                    Je reconnais <strong>Decorator</strong> car une classe implémente une interface ET a un attribut de cette même interface. L'instanciation se fait via un chaînage de <code>new()</code> : <code>new Lait(new Sucre(new Decafeine()))</code> qui finit par le component de base (PAS null). Chaque décorateur appelle <code>super(component)</code> et ajoute une fonctionnalité via <code>component.method()</code>. <strong>ATTENTION : NE PAS CONFONDRE AVEC CHAIN OF RESPONSIBILITY !</strong>
+                </p>
+                <figure style="text-align:center;">
+                    <img src="assets/th/decorator.png" alt="Decorator UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Decorator (Théorie)</figcaption>
+                </figure>
+                <h3>Exercice</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/decorator.png" alt="Decorator UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Decorator (Exercice)</figcaption>
+                </figure>
+            </section>
+
+            <hr>
+
+            <!-- <h2>Code Principal</h2> -->
+            <!-- Ajoutez ici le code principal pour l'exemple Strategy et Decorator -->
+             <h2>Strategy vs Visitor</h2>
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3>🎯 Strategy Pattern</h3>
+    <ul>
+        <li><strong>UNE seule méthode</strong> dans l'interface</li>
+        <li>Paramètres simples : <code>compare(String word)</code>, <code>calculate(int x)</code></li>
+        <li>But : <strong>Changer d'algorithme</strong> dynamiquement</li>
+        <li>Exemple : Différentes méthodes de tri, filtrage, calcul</li>
+    </ul>
+    <pre><code>public interface Strategy {
+    boolean compare(String word);  // UNE méthode
+}
+
+Strategy s = new StartsWithStrategy('t');
+boolean result = s.compare("test");</code></pre>
+
+    <h3>👁️ Visitor Pattern</h3>
+    <ul>
+        <li><strong>PLUSIEURS méthodes</strong> (une par type de nœud)</li>
+        <li>Paramètres : <strong>objets spécifiques</strong> : <code>visitCircle(Circle c)</code>, <code>visitSquare(Square s)</code></li>
+        <li>But : <strong>Parcourir/traiter une structure</strong> (souvent Composite)</li>
+        <li>Les éléments ont une méthode <code>accept(Visitor v)</code></li>
+        <li>Exemple : Exporter en XML, calculer surface totale</li>
+    </ul>
+    <pre><code>public interface Visitor {
+    String visitCircle(Circle c);
+    String visitSquare(Square s);
+    String visitCompound(CompoundShape cs);
+}
+
+// Les éléments acceptent le visiteur
+circle.accept(exporter);  // Appelle visitCircle()</code></pre>
+
+    <h3>🔑 Comment les reconnaître ?</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead>
+            <tr style="background-color: #4CAF50; color: white;">
+                <th style="padding: 10px; border: 1px solid #ddd;">Critère</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Strategy</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Visitor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Méthodes</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">1 méthode</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Plusieurs (1 par type)</td>
+            </tr>
+            <tr style="background-color: #f2f2f2;">
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Paramètres</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Types simples (String, int)</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Objets spécifiques (Circle, Square)</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Méthode accept()</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">❌ Non</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">✅ Oui</td>
+            </tr>
+            <tr style="background-color: #f2f2f2;">
+                <td style="padding: 8px; border: 1px solid #ddd;"><strong>But</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Changer d'algorithme</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">Parcourir une structure</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-top: 20px;">
+        <strong>🎓 Résumé :</strong>
+        <ul style="margin: 10px 0 0 0;">
+            <li><strong>Strategy</strong> = "J'ai plusieurs <strong>façons de faire</strong> la même chose"</li>
+            <li><strong>Visitor</strong> = "J'ai une <strong>opération à appliquer</strong> sur plusieurs <strong>types différents</strong>"</li>
+        </ul>
+        <p style="margin-top: 10px;"><strong>Astuce :</strong> Si tu vois <code>accept(Visitor v)</code> → c'est un <strong>Visitor</strong> ! 🎯</p>
+    </div>
+</div>
+<div style="background-color: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin-top: 20px;">
+    <strong>❓ Et si Strategy a plusieurs méthodes ?</strong>
+    <p style="margin: 10px 0;">
+        <strong>Question :</strong> Si j'ai une interface avec 2 fonctions différentes (<code>validate(String)</code> et <code>format(String)</code>) qui traitent le même objet, c'est Strategy ou Visitor ?
+    </p>
+    <p style="margin: 10px 0;">
+        <strong>Réponse :</strong> C'est toujours une <strong>Strategy</strong> ! La clé est : <strong>"Chaque méthode traite-t-elle un TYPE d'objet DIFFÉRENT ?"</strong>
+    </p>
+    <ul style="margin: 10px 0;">
+        <li><strong>NON</strong> (toutes prennent <code>String</code>, ou <code>int</code>, etc.) → <strong>Strategy</strong></li>
+        <li><strong>OUI</strong> (une prend <code>Circle</code>, une autre <code>Square</code>, etc.) → <strong>Visitor</strong></li>
+    </ul>
+    <p style="margin: 10px 0;"><strong>Conclusion :</strong> Même avec 10 méthodes, si elles traitent toutes le <strong>même type</strong>, c'est une <strong>Strategy</strong> ! 🎯</p>
+</div>
+        </main>
+    </div>
+</body>
+</html>

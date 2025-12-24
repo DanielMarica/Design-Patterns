@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 1 - Observer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 1</h1>
+            <p>Observer</p>
+ 
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+            <h2>Exercice : Pattern Observer</h2>
+            <p><strong>Description :</strong> Implémentation du pattern Observer pour la gestion de notifications entre objets.</p>
+            <p><strong>Pattern utilisé :</strong> Observer</p>
+             <hr>
+
+            <section>
+                <h2>Observer Pattern</h2>
+                <h3>Théorie</h3>
+                <h4>Comment le reconnaître ?</h4>
+                <p>
+                    Je reconnais <strong>Observer</strong> grâce à une <strong>liste d'observers</strong> (ex : <code>List&lt;Observer&gt;</code>) et aux méthodes <strong>attach()</strong>, <strong>detach()</strong> et <strong>notify()</strong>. Le Subject appelle <code>observer.update()</code> sur tous les observers via une boucle <code>for</code> pour les notifier d'un changement.
+                </p>
+                <figure style="text-align:center;">
+                    <img src="assets/th/observer.png" alt="Observer UML Diagram (Théorie)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Observer (Théorie)</figcaption>
+                </figure>
+                <h3>Exercice</h3>
+                <figure style="text-align:center;">
+                    <img src="assets/exos/observer.png" alt="Observer UML Diagram (Exercice)" style="max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 2px 2px 8px #eee;">
+                    <figcaption>Figure : Diagramme UML du pattern Observer (Exercice)</figcaption>
+                </figure>
+
+            </section>
+
+            <hr>
+
+            <h2>Code Principal</h2>
+            <p>Copiez chaque bloc individuellement pour construire votre solution.</p>
+            
+            <div class="code-block" style="background-color: #f4f4f4; border: 1px solid #999; margin-bottom: 15px; padding: 10px;">
+                <div class="code-header" style="font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+                    📄 1. L'interface (Observer.java)
+                </div>
+                <pre><code>public interface Observer {
+    void traiterLigne(String ligne); // Équivalent de update()
+    void afficherLigne();
+}</code></pre>
+            </div>
+
+            <div class="code-block" style="background-color: #f4f4f4; border: 1px solid #999; margin-bottom: 15px; padding: 10px;">
+                <div class="code-header" style="font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+                    📢 2. Le Sujet (Subject.java)
+                </div>
+                <pre><code>import java.util.ArrayList;
+import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Subject {
+    private List&lt;Observer&gt; observateurs = new ArrayList&lt;&gt;();
+
+    public void registerObserver(Observer o) {
+        observateurs.add(o);
+    }
+
+    // La méthode magique qui prévient tout le monde
+    private void notifyObservers(String ligne) {
+        for (Observer o : observateurs) {
+            o.traiterLigne(ligne);
+        }
+    }
+
+    public void analyserFichier(String cheminFichier) {
+        BufferedReader lecteur = null;
+        try {
+            lecteur = new BufferedReader(new FileReader(cheminFichier));
+            String ligne;
+            while ((ligne = lecteur.readLine()) != null) {
+                notifyObservers(ligne); // &lt;-- À chaque ligne, on notifie !
+            }
+            for (Observer o : observateurs) o.afficherLigne();
+            lecteur.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+            </div>
+
+            <div class="code-block" style="background-color: #f4f4f4; border: 1px solid #999; margin-bottom: 15px; padding: 10px;">
+                <div class="code-header" style="font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+                    🤖 3. Les Observateurs Concrets
+                </div>
+                <pre><code>// CLASSE : NombreLigne.java
+public class NombreLigne implements Observer {
+    private int nbrLignes = 0;
+    public void traiterLigne(String ligne) { nbrLignes++; }
+    public void afficherLigne() { System.out.println("Lignes : " + nbrLignes); }
+}
+
+// CLASSE : NombrePalindrome.java
+public class NombrePalindrome implements Observer {
+    private int nbrPalindromes = 0;
+    
+    public void traiterLigne(String ligne) {
+        for (String mot : ligne.trim().split(" ")) {
+            if (!mot.isEmpty()) {
+                StringBuffer temp = new StringBuffer(mot);
+                if (mot.equals(temp.reverse().toString())) {
+                    nbrPalindromes++;
+                }
+            }
+        }
+    }
+    public void afficherLigne() { System.out.println("Palindromes : " + nbrPalindromes); }
+}</code></pre>
+            </div>
+
+            <div class="code-block" style="background-color: #f4f4f4; border: 1px solid #999; margin-bottom: 15px; padding: 10px;">
+                <div class="code-header" style="font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+                    🚀 4. Le Client (Main.java)
+                </div>
+                <pre><code>public class Main {
+    public static void main(String[] args) {
+        Subject analyseur = new Subject();
+
+        // On "branche" les modules qu'on veut utiliser
+        analyseur.registerObserver(new NombreLigne());
+        analyseur.registerObserver(new NombrePalindrome());
+
+        analyseur.analyserFichier("test.txt");
+    }
+}</code></pre>
+            </div>
+
+            <hr>
+
+            <section class="explanation-box">
+                <h2>MEMO Technique : Analogies Simples</h2>
+                <p>Voici une explication avec des phrases très simples et des analogies de la vie de tous les jours.</p>
+
+                <h3>1. Strategy = Faire un CHOIX (C'est "l'un OU l'autre")</h3>
+                <p>Imaginez que vous utilisez un GPS pour aller quelque part. Le GPS vous demande : <em>"Quel itinéraire voulez-vous ?"</em></p>
+                <ul>
+                    <li>Option A : Le plus rapide.</li>
+                    <li>Option B : Le plus court.</li>
+                    <li>Option C : Sans péage.</li>
+                </ul>
+                <p>Vous devez en <strong>choisir une seule</strong>. Vous ne pouvez pas prendre la route la plus rapide ET la route sans péage en même temps si ce sont deux chemins différents.</p>
+                <p><strong>Dans le code :</strong> Le pattern Strategy sert à choisir <em>une seule façon</em> de faire quelque chose à un moment donné.</p>
+                <p><strong>Pourquoi ça ne va pas pour vous :</strong> Si vous utilisiez Strategy, votre analyseur ferait soit le comptage des lignes, soit la recherche de palindromes, mais pas les deux en même temps.</p>
+
+                <h3>2. Observer = Une RÉACTION (C'est "TOUS ensemble")</h3>
+                <p>Imaginez que vous êtes le professeur (le Sujet) dans une classe. Vous dites à voix haute : <em>"Sortez vos cahiers !"</em> (L'événement).</p>
+                <ul>
+                    <li>L'élève A sort son cahier bleu.</li>
+                    <li>L'élève B sort son cahier rouge.</li>
+                    <li>L'élève C arrête de dormir et sort son classeur.</li>
+                </ul>
+                <p>Vous avez parlé <strong>une seule fois</strong>, mais <strong>plusieurs personnes</strong> ont réagi chacune à leur manière, <strong>en même temps</strong>.</p>
+                <p><strong>Dans le code :</strong> Le pattern Observer sert à prévenir plusieurs objets qu'il vient de se passer quelque chose (une ligne a été lue) pour qu'ils travaillent tous dessus.</p>
+                <p><strong>Pourquoi c'est parfait pour vous :</strong> Quand le <code>Subject</code> lit une ligne, il "crie" à ses abonnés : <em>"J'ai lu une ligne !"</em>. Le compteur de mots compte, le détecteur de palindromes cherche... Ils travaillent tous en parallèle sur la même ligne.</p>
+
+                <h3>En résumé : La différence clé</h3>
+                <table border="1" cellpadding="10" cellspacing="0" style="width:100%; border-collapse: collapse; text-align: left; background-color: #fff;">
+                    <tr style="background-color: #e0e0e0;">
+                        <th>Pattern</th>
+                        <th>Mot-clé</th>
+                        <th>Logique</th>
+                        <th>Exemple Simple</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Strategy</strong></td>
+                        <td>Remplacer</td>
+                        <td>Je veux faire ça <strong>OU</strong> ça.</td>
+                        <td>Changer d'arme dans un jeu vidéo (Épée ou Arc).</td>
+                    </tr>
+                    <tr style="background-color: #e8f4f8;">
+                        <td><strong>Observer</strong></td>
+                        <td>Notifier</td>
+                        <td>Je veux faire ça <strong>ET</strong> ça.</td>
+                        <td>Envoyer un message dans un groupe WhatsApp (Tout le monde le reçoit).</td>
+                    </tr>
+                </table>
+                <p>Dans votre <code>AnalyseurDeTexte</code>, comme vous voulez toutes les statistiques à la fin (lignes ET mots ET palindromes), c'est le <strong>groupe WhatsApp (Observer)</strong> qu'il vous faut, pas le choix de l'arme (Strategy).</p>
+            </section>
+
+        </main>
+            <div style="margin: 18px 0 0 0; padding: 12px; background: #f7f7f7; border-left: 4px solid #0074d9;">
+                <strong>Phrase clé Strategy :</strong> Le Context change de stratégie. <u>UNE seule active à la fois.</u><br>
+                <strong>Phrase clé Observer :</strong> Le Subject notifie <u>TOUS</u> les observers enregistrés.
+            </div>
+            <section style="margin-top: 20px; background: #f9f9f9; border: 2px solid #bbb; padding: 20px;">
+                <h2>Comment différencier Observer et Strategy ?</h2>
+                <h3>STRATEGY :</h3>
+                <ul>
+                    <li>Tu vois <code>private Strategy strategy</code> (pas de List)</li>
+                    <li>Tu vois <code>setStrategy()</code> ou injection constructeur</li>
+                    <li>Tu vois <code>strategy.method()</code> → Délègue à 1</li>
+                </ul>
+                <h3>OBSERVER :</h3>
+                <ul>
+                    <li>Tu vois <code>List&lt;Observer&gt;</code> ou <code>ArrayList&lt;Observer&gt;</code></li>
+                    <li>Tu vois <code>attach()</code>, <code>detach()</code>, <code>notify()</code></li>
+                    <li>Tu vois boucle <code>for</code> qui appelle <code>observer.update()</code></li>
+                </ul>
+            </section>
+    </div>
+</body>
+</html>

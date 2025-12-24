@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 3C - Adapter + Decorator + Strategy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 3C - Bateaux de Guerre</h1>
+            <p>Adapter + Decorator + Strategy</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+            <h2>🎯 Exercice : Bateaux de Guerre</h2>
+            
+            <h3>📋 Description</h3>
+            <p>Un système de bateaux de guerre où un Captain commande un bateau qui peut être un FishingBoat adapté en BattleShip. La distance peut être en KM ou en Miles.</p>
+            <p><strong>Patterns identifiés :</strong> Adapter, Decorator, Strategy</p>
+
+            <hr>
+
+            <h2>🔌 PATTERN 1 : ADAPTER</h2>
+
+            <h3>📊 Diagramme UML Théorique</h3>
+            <img src="assets/th/Adapter.png" alt="Diagramme Adapter" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🎯 Dans l'exercice</h3>
+            <p><strong>BattleFishingBoat</strong> adapte <strong>FishingBoat</strong> pour l'interface <strong>BattleShip</strong></p>
+
+            <h3>💻 Code de l'Adapter</h3>
+            <pre>// Target (interface attendue)
+public interface BattleShip {
+    void fire();
+    void move(Distance distance);
+}
+
+// Adaptee (classe incompatible)
+public class FishingBoat {
+    public void sail(Distance distance) { }  // ← Méthode différente
+    public void fish() { }                    // ← Méthode différente
+}
+
+// ADAPTER - Fait le pont
+public class BattleFishingBoat implements BattleShip {
+    private FishingBoat boat;  // ← Contient Adaptee
+    
+    @Override
+    public void fire() {
+        boat.fish();  // ← fire() → fish() (NOMS DIFFÉRENTS)
+    }
+    
+    @Override
+    public void move(Distance distance) {
+        boat.sail(distance);  // ← move() → sail() (NOMS DIFFÉRENTS)
+    }
+}</pre>
+
+            <h3>📊 Tableaux de correspondance</h3>
+
+            <h4>Tableau 1 : Participants</h4>
+            <table>
+                <tr>
+                    <th>Participants théoriques</th>
+                    <th>Noms dans le code</th>
+                </tr>
+                <tr>
+                    <td>Client</td>
+                    <td>App (main)</td>
+                </tr>
+                <tr>
+                    <td>Target</td>
+                    <td>BattleShip</td>
+                </tr>
+                <tr>
+                    <td>Adapter</td>
+                    <td>BattleFishingBoat</td>
+                </tr>
+                <tr>
+                    <td>Adaptee</td>
+                    <td>FishingBoat</td>
+                </tr>
+            </table>
+
+            <h4>Tableau 2 : Méthodes</h4>
+            <table>
+                <tr>
+                    <th>Méthodes théoriques</th>
+                    <th>Méthodes dans le code</th>
+                </tr>
+                <tr>
+                    <td>doWork() (Client)</td>
+                    <td>captain.fire(), captain.move()</td>
+                </tr>
+                <tr>
+                    <td>methodA() (Adapter)</td>
+                    <td>fire(), move()</td>
+                </tr>
+                <tr>
+                    <td>methodB() (Adaptee)</td>
+                    <td>fish(), sail()</td>
+                </tr>
+            </table>
+
+            <h3>🔍 Indices pour reconnaître Adapter</h3>
+            <ul>
+                <li>✅ BattleFishingBoat implémente BattleShip (Target)</li>
+                <li>✅ Contient FishingBoat (Adaptee - type différent)</li>
+                <li>✅ Méthodes avec noms différents (fire→fish, move→sail)</li>
+                <li>✅ But : Rendre compatible</li>
+            </ul>
+
+            <hr>
+
+            <h2>🎨 PATTERN 2 : DECORATOR</h2>
+
+            <h3>📊 Diagramme UML Théorique</h3>
+            <img src="assets/th/Decorator.png" alt="Diagramme Decorator" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🎯 Dans l'exercice</h3>
+            <p><strong>Captain</strong> décore un <strong>BattleShip</strong> en ajoutant "Captain's order : "</p>
+
+            <h3>💻 Code du Decorator</h3>
+            <pre>// Component (interface)
+public interface BattleShip {
+    void fire();
+    void move(Distance distance);
+}
+
+// ConcreteComponent
+public class BattleFishingBoat implements BattleShip {
+    // ... implémentation de base
+}
+
+// DECORATOR
+public class Captain implements BattleShip {
+    private BattleShip battleship;  // ← Contient BattleShip (MÊME type)
+    
+    public Captain(BattleShip battleship) {
+        this.battleship = battleship;
+    }
+    
+    @Override
+    public void fire() {
+        System.out.print("Captain's order : ");  // ← AJOUTE préfixe
+        battleship.fire();  // ← Délègue
+    }
+    
+    @Override
+    public void move(Distance distance) {
+        System.out.print("Captain's order : ");  // ← AJOUTE préfixe
+        battleship.move(distance);  // ← Délègue
+    }
+}</pre>
+
+            <h3>📊 Tableaux de correspondance</h3>
+
+            <h4>Tableau 1 : Participants</h4>
+            <table>
+                <tr>
+                    <th>Participants théoriques</th>
+                    <th>Noms dans le code</th>
+                </tr>
+                <tr>
+                    <td>Component (interface)</td>
+                    <td>BattleShip</td>
+                </tr>
+                <tr>
+                    <td>ConcreteComponent</td>
+                    <td>BattleFishingBoat</td>
+                </tr>
+                <tr>
+                    <td>Decorator</td>
+                    <td>Captain</td>
+                </tr>
+            </table>
+
+            <h4>Tableau 2 : Méthodes</h4>
+            <table>
+                <tr>
+                    <th>Méthodes théoriques</th>
+                    <th>Méthodes dans le code</th>
+                </tr>
+                <tr>
+                    <td>operation()</td>
+                    <td>fire(), move()</td>
+                </tr>
+            </table>
+
+            <h3>🔍 Indices pour reconnaître Decorator</h3>
+            <ul>
+                <li>✅ Captain implémente BattleShip ET contient BattleShip (même type)</li>
+                <li>✅ Ajoute "Captain's order : " avant chaque action</li>
+                <li>✅ Délègue à battleship.fire()</li>
+                <li>✅ But : Ajouter fonctionnalité</li>
+            </ul>
+
+            <hr>
+
+            <h2>🎯 PATTERN 3 : STRATEGY</h2>
+
+            <h3>📊 Diagramme UML Théorique</h3>
+            <img src="assets/th/strategy.png" alt="Diagramme Strategy" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🎯 Dans l'exercice</h3>
+            <p><strong>Distance</strong> est une stratégie qui peut être en <strong>KM</strong> ou en <strong>Miles</strong></p>
+
+            <h3>💻 Code de la Strategy</h3>
+            <pre>// Strategy (interface)
+public interface Distance {
+    String getDistance();
+}
+
+// ConcreteStrategy A
+public class DistanceKM implements Distance {
+    private int km;
+    
+    public DistanceKM(int km) {
+        this.km = km;
+    }
+    
+    @Override
+    public String getDistance() {
+        return km + " kms";
+    }
+}
+
+// ConcreteStrategy B
+public class DistanceMiles implements Distance {
+    private int miles;
+    
+    public DistanceMiles(int miles) {
+        this.miles = miles;
+    }
+    
+    @Override
+    public String getDistance() {
+        return miles + " miles";
+    }
+}
+
+// Context (utilise la stratégie)
+public void move(Distance distance) {
+    System.out.println("Moving " + distance.getDistance());
+}</pre>
+
+            <h3>📊 Tableaux de correspondance</h3>
+
+            <h4>Tableau 1 : Participants</h4>
+            <table>
+                <tr>
+                    <th>Participants théoriques</th>
+                    <th>Noms dans le code</th>
+                </tr>
+                <tr>
+                    <td>Strategy (interface)</td>
+                    <td>Distance</td>
+                </tr>
+                <tr>
+                    <td>ConcreteStrategyA</td>
+                    <td>DistanceKM</td>
+                </tr>
+                <tr>
+                    <td>ConcreteStrategyB</td>
+                    <td>DistanceMiles</td>
+                </tr>
+                <tr>
+                    <td>Context</td>
+                    <td>BattleShip (méthode move)</td>
+                </tr>
+            </table>
+
+            <h4>Tableau 2 : Méthodes</h4>
+            <table>
+                <tr>
+                    <th>Méthodes théoriques</th>
+                    <th>Méthodes dans le code</th>
+                </tr>
+                <tr>
+                    <td>execute() / algorithm()</td>
+                    <td>getDistance()</td>
+                </tr>
+            </table>
+
+            <h3>🔍 Indices pour reconnaître Strategy</h3>
+            <ul>
+                <li>✅ Distance est une interface avec UNE méthode (getDistance)</li>
+                <li>✅ Plusieurs ConcreteStrategy (DistanceKM, DistanceMiles)</li>
+                <li>✅ Passée en paramètre : move(Distance distance)</li>
+                <li>✅ But : Changer d'algorithme (KM ou Miles)</li>
+            </ul>
+
+            <hr>
+
+            <h2>🔄 Flow complet d'exécution</h2>
+
+            <h3>Code Main</h3>
+            <pre>Captain captain = new Captain(new BattleFishingBoat());
+captain.move(new DistanceKM(500));
+captain.fire();</pre>
+
+            <h3>Exécution détaillée</h3>
+            <pre>1. new BattleFishingBoat() créé (ADAPTER)
+   FishingBoat → BattleShip
+
+2. new Captain(battleship) créé (DECORATOR)
+   Enveloppe BattleFishingBoat
+
+3. captain.move(new DistanceKM(500)) appelé (STRATEGY)
+   ↓
+   Captain.move()
+     → Print "Captain's order : "  (DECORATOR)
+     → battleship.move(distance)
+       ↓
+       BattleFishingBoat.move()  (ADAPTER)
+         → boat.sail(distance)
+           ↓
+           FishingBoat.sail()
+             → Print "The Boat is moving 500 kms"  (STRATEGY)
+
+4. captain.fire() appelé
+   ↓
+   Captain.fire()
+     → Print "Captain's order : "  (DECORATOR)
+     → battleship.fire()
+       ↓
+       BattleFishingBoat.fire()  (ADAPTER)
+         → boat.fish()
+           ↓
+           FishingBoat.fish()
+             → Print "fishing ..."</pre>
+
+            <h3>Output</h3>
+            <pre>Captain's order : The Boat is moving 500 kms
+Captain's order : fishing ...</pre>
+
+            <hr>
+
+            <h2>🆚 Comparaison des 3 patterns</h2>
+
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>ADAPTER</th>
+                    <th>DECORATOR</th>
+                    <th>STRATEGY</th>
+                </tr>
+                <tr>
+                    <td><strong>But</strong></td>
+                    <td>Compatibilité</td>
+                    <td>Ajouter fonctionnalité</td>
+                    <td>Changer algorithme</td>
+                </tr>
+                <tr>
+                    <td><strong>Contient</strong></td>
+                    <td>Type différent</td>
+                    <td>Même type</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><strong>Méthodes</strong></td>
+                    <td>Noms différents</td>
+                    <td>Mêmes noms</td>
+                    <td>UNE méthode</td>
+                </tr>
+                <tr>
+                    <td><strong>Exemple</strong></td>
+                    <td>fire() → fish()</td>
+                    <td>Ajoute "Captain's order"</td>
+                    <td>KM ou Miles</td>
+                </tr>
+            </table>
+
+            <hr>
+
+            <h2>💡 Points clés</h2>
+
+            <h3>ADAPTER (BattleFishingBoat)</h3>
+            <ul>
+                <li>Rend FishingBoat compatible avec BattleShip</li>
+                <li>Traduit fire()→fish() et move()→sail()</li>
+                <li>Type contenu différent</li>
+            </ul>
+
+            <h3>DECORATOR (Captain)</h3>
+            <ul>
+                <li>Ajoute "Captain's order : " avant chaque action</li>
+                <li>Enveloppe un BattleShip</li>
+                <li>Type contenu identique</li>
+            </ul>
+
+            <h3>STRATEGY (Distance)</h3>
+            <ul>
+                <li>Permet de choisir entre KM et Miles</li>
+                <li>UNE méthode : getDistance()</li>
+                <li>Passée en paramètre</li>
+            </ul>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>
