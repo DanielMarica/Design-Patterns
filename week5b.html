@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 5B - Template Method & Facade</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Style pour le tableau de comparaison */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .comparison-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            border: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .comparison-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 5B</h1>
+            <p>Template Method + Facade</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+
+            <h2 id="template-method">📋 PATTERN 1 : TEMPLATE METHOD</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Classe <strong>abstraite</strong> avec une méthode <strong>concrète</strong> (le template)</li>
+                    <li>✅ Le template appelle des méthodes <strong>abstraites</strong> (primitive operations)</li>
+                    <li>✅ Les sous-classes <strong>implémentent</strong> les méthodes abstraites</li>
+                    <li>✅ Le squelette de l'algorithme est <strong>fixé</strong>, les détails sont <strong>variables</strong></li>
+                    <li>✅ Peut avoir des méthodes "hook" (optionnelles, avec implémentation par défaut)</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Template Method grâce à une classe abstraite avec une méthode concrète qui appelle des méthodes abstraites que les sous-classes doivent implémenter."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/TemplateMethod.png" alt="Diagramme Template Method Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <p><em>Le diagramme montre uniquement les classes liées au pattern Template Method (DwarvenMineWorker et ses sous-classes).</em></p>
+            <figure style="text-align:center;">
+                <img src="assets/exos/TemplateMethod.png" alt="Diagramme UML du pattern Template Method (Exercice Dwarven)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Template Method - Uniquement DwarvenMineWorker et ses sous-classes (DwarvenGoldDigger, DwarvenCartOperator, DwarvenTunnelDigger)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>AbstractClass</strong><br>(Classe Abstraite)</td>
+                        <td><code>DwarvenMineWorker</code></td>
+                        <td>Classe abstraite qui définit le template method et les méthodes concrètes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>templateMethod()</strong><br>(Méthode Template)</td>
+                        <td><code>action(Action... actions)</code></td>
+                        <td>Méthode concrète qui orchestre l'exécution des actions. C'est le squelette de l'algorithme.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>primitiveOperation()</strong><br>(Opération Abstraite)</td>
+                        <td><code>work()</code><br><code>name()</code></td>
+                        <td>Méthodes abstraites que les sous-classes DOIVENT implémenter. Chaque type de worker a son propre travail.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>hook()</strong><br>(Méthode Hook)</td>
+                        <td><code>goToSleep()</code><br><code>wakeUp()</code><br><code>goHome()</code><br><code>goToMine()</code></td>
+                        <td>Méthodes concrètes avec implémentation par défaut. Les sous-classes peuvent les réutiliser ou les surcharger.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteClass</strong><br>(Classe Concrète)</td>
+                        <td><code>DwarvenGoldDigger</code><br><code>DwarvenCartOperator</code><br><code>DwarvenTunnelDigger</code></td>
+                        <td>Classes concrètes qui implémentent les opérations abstraites (work et name).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. La Classe Abstraite (AbstractClass)</h4>
+            <pre><code>package be.vinci.Ex5B;
+
+public abstract class DwarvenMineWorker {
+
+  // ===== HOOKS (méthodes concrètes par défaut) =====
+  public void goToSleep() {
+    System.out.println(name()+" va dormir.");
+  }
+
+  public void wakeUp() {
+    System.out.println(name()+" se réveille.");
+  }
+
+  public void goHome() {
+    System.out.println(name()+" rentre chez lui.");
+  }
+
+  public void goToMine() {
+    System.out.println(name()+" va à la mine.");
+  }
+
+  // ===== TEMPLATE METHOD (méthode concrète) =====
+  // Orchestre l'exécution des actions
+  public void action(Action... actions) {
+    for (Action action : actions) {
+      action(action);
+    }
+  }
+
+  private void action(Action action) {
+    switch (action) {
+      case GO_TO_SLEEP:
+        goToSleep();
+        break;
+      case WAKE_UP:
+        wakeUp();
+        break;
+      case GO_HOME:
+        goHome();
+        break;
+      case GO_TO_MINE:
+        goToMine();
+        break;
+      case WORK:
+        work();  // ← Appelle la méthode abstraite !
+        break;
+      default:
+        System.out.println("Action non definie");
+        break;
+    }
+  }
+
+  // ===== PRIMITIVE OPERATIONS (méthodes abstraites) =====
+  // Les sous-classes DOIVENT les implémenter
+  public abstract void work();
+  public abstract String name();
+
+  static enum Action {
+    GO_TO_SLEEP, WAKE_UP, GO_HOME, GO_TO_MINE, WORK
+  }
+}</code></pre>
+
+            <h4>2. Les Classes Concrètes (ConcreteClass)</h4>
+            <pre><code>// DwarvenGoldDigger.java
+public class DwarvenGoldDigger extends DwarvenMineWorker {
+  @Override
+  public void work() {
+    System.out.println(name()+" creuse pour trouver de l'or.");
+  }
+
+  @Override
+  public String name() {
+    return "Chercheur d'or nain";
+  }
+}
+
+// DwarvenCartOperator.java
+public class DwarvenCartOperator extends DwarvenMineWorker {
+  @Override
+  public void work() {
+    System.out.println(name()+" enlève du minerai d'or de la mine.");
+  }
+
+  @Override
+  public String name() {
+    return "Opérateur de chariot nain";
+  }
+}
+
+// DwarvenTunnelDigger.java
+public class DwarvenTunnelDigger extends DwarvenMineWorker {
+  @Override
+  public void work() {
+    System.out.println(name()+" crée un nouveau tunnel, cela sent l'or.");
+  }
+
+  @Override
+  public String name() {
+    return "Tunnelier nain";
+  }
+}</code></pre>
+
+            <h4>3. Utilisation</h4>
+            <pre><code>// Créer un worker
+DwarvenMineWorker worker = new DwarvenGoldDigger();
+
+// Utiliser le template method
+worker.action(Action.WAKE_UP, Action.GO_TO_MINE, Action.WORK);</code></pre>
+
+
+            <h2 id="facade">🏛️ PATTERN 2 : FACADE</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Une classe qui <strong>simplifie l'utilisation</strong> d'un système complexe</li>
+                    <li>✅ Fournit une <strong>interface simple</strong> pour des opérations complexes</li>
+                    <li>✅ <strong>Cache la complexité</strong> des sous-systèmes</li>
+                    <li>✅ Le client n'a pas besoin de connaître les détails internes</li>
+                    <li>✅ Coordonne plusieurs objets en une seule méthode</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Facade grâce à une classe qui simplifie l'utilisation d'un système complexe en fournissant une interface simple."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Facades.png" alt="Diagramme Facade Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <p><em>Le diagramme montre uniquement la classe Facade (DwarvenGoldmine) et sa relation avec les workers.</em></p>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Facades.png" alt="Diagramme UML du pattern Facade (Exercice Dwarven)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Facade - Uniquement DwarvenGoldmine (Facade) qui orchestre les workers</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Facade</strong><br>(La Façade)</td>
+                        <td><code>DwarvenGoldmine</code></td>
+                        <td>Classe qui simplifie la gestion de tous les workers. Fournit des méthodes simples comme <code>startNewDay()</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Subsystem Classes</strong><br>(Sous-systèmes)</td>
+                        <td><code>DwarvenGoldDigger</code><br><code>DwarvenCartOperator</code><br><code>DwarvenTunnelDigger</code></td>
+                        <td>Classes complexes que la Facade orchestre. Le client n'a pas besoin de les connaître directement.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Client</strong></td>
+                        <td><code>Main</code></td>
+                        <td>Utilise la Facade pour des opérations simples sans connaître la complexité interne.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure)</h3>
+
+            <h4>1. La Facade (Simplifie l'utilisation)</h4>
+            <pre><code>package be.vinci.Ex5B;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+public class DwarvenGoldmine {
+
+  private final List&lt;DwarvenMineWorker&gt; workers;
+
+  public DwarvenGoldmine() {
+    // Construction du système complexe
+    workers = new ArrayList&lt;&gt;();
+    workers.add(new DwarvenGoldDigger());
+    workers.add(new DwarvenCartOperator());
+    workers.add(new DwarvenTunnelDigger());
+  }
+
+  // ===== INTERFACE SIMPLIFIÉE =====
+  // Le client appelle juste ces 3 méthodes !
+  
+  public void startNewDay() {
+    makeActions(workers, 
+                DwarvenMineWorker.Action.WAKE_UP, 
+                DwarvenMineWorker.Action.GO_TO_MINE);
+  }
+
+  public void digOutGold() {
+    makeActions(workers, DwarvenMineWorker.Action.WORK);
+  }
+
+  public void endDay() {
+    makeActions(workers, 
+                DwarvenMineWorker.Action.GO_HOME, 
+                DwarvenMineWorker.Action.GO_TO_SLEEP);
+  }
+
+  // Méthode privée qui cache la complexité
+  private static void makeActions(Collection&lt;DwarvenMineWorker&gt; workers,
+                                   DwarvenMineWorker.Action... actions) {
+    for (DwarvenMineWorker worker : workers) {
+      worker.action(actions);
+    }
+  }
+}</code></pre>
+
+            <h4>2. Le Client (Main) - Interface Simplifiée !</h4>
+            <pre><code>package be.vinci.Ex5B;
+
+public class Main {
+  public static void main(String[] args) {
+    // Création de la facade
+    DwarvenGoldmine jjGoldmine = new DwarvenGoldmine();
+    
+    // Utilisation SIMPLE grâce à la Facade !
+    jjGoldmine.startNewDay();  // ← Une seule ligne !
+    jjGoldmine.digOutGold();   // ← Une seule ligne !
+    jjGoldmine.endDay();       // ← Une seule ligne !
+  }
+}</code></pre>
+
+            <h4>3. Comparaison : Avec vs Sans Facade</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                <div style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px;">
+                    <h5 style="color: #155724;">✅ AVEC Facade (Simple)</h5>
+                    <pre><code>DwarvenGoldmine mine = new DwarvenGoldmine();
+mine.startNewDay();
+mine.digOutGold();
+mine.endDay();</code></pre>
+                    <p><strong>3 lignes claires et simples !</strong></p>
+                </div>
+                
+                <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px;">
+                    <h5 style="color: #721c24;">❌ SANS Facade (Complexe)</h5>
+                    <pre><code>List&lt;DwarvenMineWorker&gt; workers = new ArrayList&lt;&gt;();
+workers.add(new DwarvenGoldDigger());
+workers.add(new DwarvenCartOperator());
+workers.add(new DwarvenTunnelDigger());
+
+for (DwarvenMineWorker w : workers) {
+    w.action(Action.WAKE_UP, Action.GO_TO_MINE);
+}
+for (DwarvenMineWorker w : workers) {
+    w.action(Action.WORK);
+}
+for (DwarvenMineWorker w : workers) {
+    w.action(Action.GO_HOME, Action.GO_TO_SLEEP);
+}</code></pre>
+                    <p><strong>15+ lignes répétitives et complexes !</strong></p>
+                </div>
+            </div>
+
+
+            <hr>
+
+            <h2 id="not-state">❓ POURQUOI CE N'EST PAS STATE ?</h2>
+
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
+                <h3>🤔 La Question</h3>
+                <p>"Il y a plusieurs <code>Action</code> (GO_TO_SLEEP, WAKE_UP, GO_HOME...), ce sont des états non ? Donc c'est le pattern State ?"</p>
+                
+                <h3>❌ Non, ce n'est PAS State !</h3>
+                
+                <h4>Les 3 Différences Critiques :</h4>
+                
+                <table class="comparison-table" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Critère</th>
+                            <th>Pattern State</th>
+                            <th>Notre Code (Template Method)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>État stocké ?</strong></td>
+                            <td>✅ Oui : <code>private State currentState</code></td>
+                            <td>❌ Non : pas d'attribut d'état</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Comportement dépend de l'état ?</strong></td>
+                            <td>✅ Oui : <code>state.handle()</code> agit différemment</td>
+                            <td>❌ Non : chaque action est indépendante</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transition d'état ?</strong></td>
+                            <td>✅ Oui : <code>setState(newState)</code></td>
+                            <td>❌ Non : juste exécution d'actions</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>📝 Explication Détaillée</h4>
+                
+                <h5>1. Les <code>Action</code> ne sont PAS des états :</h5>
+                <ul>
+                    <li>Ce sont des <strong>commandes/actions ponctuelles</strong></li>
+                    <li>Elles ne changent pas le <strong>comportement</strong> du worker</li>
+                    <li>Le worker n'a pas d'état interne qui persiste</li>
+                </ul>
+
+                <h5>2. Notre code exécute juste des actions :</h5>
+                <pre><code>worker.action(Action.WAKE_UP);   // Action 1
+worker.action(Action.GO_TO_MINE); // Action 2
+worker.action(Action.WORK);       // Action 3
+
+// Le worker n'a PAS changé d'état !
+// Il a juste exécuté 3 actions différentes</code></pre>
+
+                <h5>3. Exemple de VRAI State Pattern :</h5>
+                <pre><code>// ✅ Pattern State (avec état interne)
+public class LightSwitch {
+    private State state;  // ← État stocké !
+    
+    public LightSwitch() {
+        state = new OffState();
+    }
+    
+    public void press() {
+        state.press(this);  // Comportement dépend de l'état
+    }
+    
+    public void setState(State newState) {
+        this.state = newState;  // ← Transition d'état !
+    }
+}
+
+interface State {
+    void press(LightSwitch context);
+}
+
+class OffState implements State {
+    public void press(LightSwitch context) {
+        System.out.println("Allume");
+        context.setState(new OnState());  // Transition
+    }
+}
+
+class OnState implements State {
+    public void press(LightSwitch context) {
+        System.out.println("Éteint");
+        context.setState(new OffState());  // Transition
+    }
+}</code></pre>
+
+                <h4>🎯 Résumé</h4>
+                <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; margin-top: 15px;">
+                    <p><strong>Notre code :</strong></p>
+                    <ul>
+                        <li>✅ <strong>Template Method</strong> : Définit un algorithme avec des étapes variables</li>
+                        <li>✅ <strong>Facade</strong> : Simplifie l'utilisation du système</li>
+                        <li>❌ <strong>PAS State</strong> : Les <code>Action</code> sont des commandes, pas des états</li>
+                    </ul>
+                    <p><strong>Pour être State, il faudrait :</strong></p>
+                    <ul>
+                        <li>Un attribut <code>private State currentState</code></li>
+                        <li>Des transitions : <code>setState(newState)</code></li>
+                        <li>Un comportement qui change selon l'état actuel</li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <hr>
+
+            <h2 id="not-composite">🌳 POURQUOI CE N'EST PAS COMPOSITE ?</h2>
+
+            <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 20px; margin: 20px 0;">
+                <h3>🤔 La Question</h3>
+                <p>"<code>DwarvenGoldmine</code> contient une <code>List&lt;DwarvenMineWorker&gt;</code> et les traite uniformément. N'est-ce pas un Composite ? <code>DwarvenMineWorker</code> serait le Component et <code>DwarvenGoldmine</code> serait le Composite ?"</p>
+                
+                <h3>❌ Non, ce n'est PAS Composite !</h3>
+                
+                <h4>Les 3 Critères Manquants :</h4>
+                
+                <table class="comparison-table" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Critère</th>
+                            <th>Pattern Composite</th>
+                            <th>Notre Code (Facade)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Interface commune</strong></td>
+                            <td>✅ Composite <strong>implémente</strong> Component</td>
+                            <td>❌ Mine <strong>n'implémente pas</strong> Worker</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Méthode identique</strong></td>
+                            <td>✅ <code>operation()</code> partout</td>
+                            <td>❌ <code>action()</code> vs <code>startNewDay()</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Récursivité</strong></td>
+                            <td>✅ Composite peut contenir Composite</td>
+                            <td>❌ Pas de structure arborescente</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>📝 Explication Détaillée</h4>
+                
+                <h5>1. Critère #1 : Interface commune manquante</h5>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                    <div style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px;">
+                        <h6 style="color: #155724;">✅ Vrai Composite</h6>
+                        <pre><code>interface Component {
+    void operation();
+}
+
+class Leaf implements Component {
+    void operation() { ... }
+}
+
+class Composite implements Component {
+    List&lt;Component&gt; children;
+    void operation() {
+        for (Component c : children) {
+            c.operation();
+        }
+    }
+}</code></pre>
+                        <p><strong>Le Composite EST un Component !</strong></p>
+                    </div>
+                    
+                    <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px;">
+                        <h6 style="color: #721c24;">❌ Notre Code</h6>
+                        <pre><code>abstract class DwarvenMineWorker {
+    void action(Action... actions) { ... }
+}
+
+class DwarvenGoldDigger 
+    extends DwarvenMineWorker { ... }
+
+class DwarvenGoldmine {  // ❌ Pas extends !
+    List&lt;DwarvenMineWorker&gt; workers;
+    void startNewDay() { ... }  // Méthode différente
+}</code></pre>
+                        <p><strong>La Mine N'EST PAS un Worker !</strong></p>
+                    </div>
+                </div>
+
+                <h5>2. Critère #2 : Pas de récursivité</h5>
+                <pre><code>// ✅ Composite : Structure arborescente possible
+Composite root = new Composite();
+Composite subGroup = new Composite();
+subGroup.add(new Leaf());
+root.add(subGroup);  // ← Composite dans Composite !
+
+// ❌ Notre code : Impossible
+DwarvenGoldmine mine = new DwarvenGoldmine();
+// mine.add(new DwarvenGoldmine());  ← Impossible !
+// La mine ne peut pas contenir d'autres mines</code></pre>
+
+                <h5>3. Critère #3 : Interface différente</h5>
+                <pre><code>// ✅ Composite : Même méthode partout
+worker.operation();
+composite.operation();  // Même interface !
+
+// ❌ Notre code : Méthodes différentes
+worker.action(Action.WORK);  // Pour les workers
+mine.startNewDay();          // Pour la mine (différent !)</code></pre>
+
+                <h4>🎯 Ce que nous avons réellement</h4>
+                <p><strong>Facade + Simple Collection</strong></p>
+                <pre><code>// C'est une FACADE qui coordonne des workers
+class DwarvenGoldmine {  // Facade
+    List&lt;DwarvenMineWorker&gt; workers;  // Simple collection
+    
+    // Interface simplifiée (≠ interface des workers)
+    void startNewDay() { ... }
+    void digOutGold() { ... }
+    void endDay() { ... }
+}</code></pre>
+
+                <h4>✅ Pour que ce SOIT un Composite :</h4>
+                <p>Il faudrait refactorer comme ceci :</p>
+                <pre><code>// 1. Interface commune
+interface MineComponent {
+    void doWork();
+}
+
+// 2. Leaf (worker individuel)
+class DwarvenGoldDigger implements MineComponent {
+    public void doWork() {
+        System.out.println("Creuse");
+    }
+}
+
+// 3. Composite (mine = groupe)
+class DwarvenGoldmine implements MineComponent {  // ← Implémente Component !
+    private List&lt;MineComponent&gt; workers;
+    
+    public void doWork() {  // ← Même méthode !
+        for (MineComponent w : workers) {
+            w.doWork();
+        }
+    }
+}
+
+// 4. Utilisation uniforme
+MineComponent worker = new DwarvenGoldDigger();
+MineComponent mine = new DwarvenGoldmine();
+mine.add(worker);
+
+// Même interface partout !
+worker.doWork();
+mine.doWork();</code></pre>
+
+                <h4>🔑 Résumé</h4>
+                <div style="background-color: #fff3cd; border: 1px solid #856404; padding: 15px; margin-top: 15px;">
+                    <p><strong>Règle d'or du Composite :</strong></p>
+                    <p><em>"Le conteneur DOIT implémenter la même interface que les éléments qu'il contient."</em></p>
+                    
+                    <p style="margin-top: 15px;"><strong>Dans notre code :</strong></p>
+                    <ul>
+                        <li>✅ <code>DwarvenGoldmine</code> contient des <code>DwarvenMineWorker</code></li>
+                        <li>❌ <code>DwarvenGoldmine</code> n'est PAS un <code>DwarvenMineWorker</code></li>
+                        <li>➡️ Donc c'est une <strong>Facade</strong>, pas un <strong>Composite</strong></li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px;"><strong>⚠️ Piège classique :</strong> Toute collection d'objets traités uniformément n'est pas forcément un Composite !</p>
+                </div>
+            </div>
+
+
+            <hr>
+
+            <h2>💡 Conseils Supplémentaires</h2>
+
+            <h3>⚠️ Pièges à éviter</h3>
+
+            <div style="background-color: #fff3cd; border: 1px solid #856404; padding: 15px; margin: 20px 0;">
+                <h4>Template Method vs Strategy</h4>
+                <ul>
+                    <li><strong>Template Method :</strong> Utilise l'<strong>héritage</strong>. Classe abstraite avec méthodes abstraites.</li>
+                    <li><strong>Strategy :</strong> Utilise la <strong>composition</strong>. Interface injectée via constructeur/setter.</li>
+                </ul>
+
+                <h4>Facade vs Adapter</h4>
+                <ul>
+                    <li><strong>Facade :</strong> <strong>Simplifie</strong> un système complexe. Interface plus simple.</li>
+                    <li><strong>Adapter :</strong> <strong>Convertit</strong> une interface en une autre. Adapte une interface existante.</li>
+                </ul>
+                
+                <h4>Actions (Enum) vs State Pattern</h4>
+                <ul>
+                    <li><strong>Enum d'actions :</strong> Liste de <strong>commandes</strong> à exécuter. Pas d'état persistant.</li>
+                    <li><strong>State Pattern :</strong> <strong>État interne</strong> qui change le comportement. Transitions entre états.</li>
+                </ul>
+            </div>
+
+            <h3>📚 Points Clés à Retenir</h3>
+            <ul>
+                <li><strong>Template Method</strong> fixe le squelette, les sous-classes remplissent les détails</li>
+                <li><strong>Facade</strong> cache la complexité et fournit une interface simple</li>
+                <li>Les <strong>Actions</strong> ne sont pas des <strong>États</strong></li>
+                <li><strong>Template Method</strong> = Héritage, <strong>Strategy</strong> = Composition</li>
+                <li><strong>Composite</strong> = Le conteneur implémente la même interface que ses éléments</li>
+                <li><strong>Facade avec Collection</strong> ≠ <strong>Composite</strong></li>
+            </ul>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>

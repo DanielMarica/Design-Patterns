@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semaine 5C - Builder, Composite, Visitor, Iterator & Strategy</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Style pour le tableau de comparaison */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .comparison-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            border: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .comparison-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Semaine 5C</h1>
+            <p>Builder + Composite + Visitor + Iterator + Strategy</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="theory.html">Théorie</a>
+        </nav>
+
+        <main>
+
+            <h2 id="builder">🏗️ PATTERN 1 : BUILDER</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Sépare la construction d'un objet complexe de sa représentation.</li>
+                    <li>✅ Une classe <strong>Director</strong> qui orchestre la construction.</li>
+                    <li>✅ Une interface/classe abstraite <strong>Builder</strong> avec des méthodes de construction.</li>
+                    <li>✅ Un <strong>ConcreteBuilder</strong> qui implémente les étapes de construction.</li>
+                    <li>✅ Le produit final est obtenu via <code>getResult()</code>.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Builder car <code>Lecteur</code> (Director) utilise <code>Fabriquant</code> (ConcreteBuilder) pour construire progressivement un objet <code>Partie</code> (Product)."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Builder.png" alt="Diagramme Builder Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/BuilderEXO5.png" alt="Diagramme UML du pattern Builder (Exercice 5C)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Builder (Exercice 5C)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Director</strong><br>(Directeur)</td>
+                        <td><code>Lecteur</code></td>
+                        <td>Dirige le processus de construction en appelant les méthodes du Builder dans le bon ordre (lecture du fichier caractère par caractère).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Builder</strong><br>(Interface de construction)</td>
+                        <td><em>Interface implicite</em></td>
+                        <td>Définit les méthodes de construction (ici implémentées directement dans Fabriquant).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteBuilder</strong><br>(Constructeur concret)</td>
+                        <td><code>Fabriquant</code></td>
+                        <td>Implémente la logique de construction : crée les Groupes et Valeurs, gère la hiérarchie avec une Pile.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Product</strong><br>(Produit)</td>
+                        <td><code>Partie</code><br>(Groupe/Valeur)</td>
+                        <td>L'objet complexe résultant de la construction (structure composite hiérarchique).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>getResult()</strong></td>
+                        <td><code>getResultat()</code></td>
+                        <td>Méthode pour récupérer le produit final après la construction.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure expliquée)</h3>
+
+            <h4>1. Le Director (Lecteur)</h4>
+            <p>C'est lui qui orchestre la construction. Il lit le fichier et appelle les bonnes méthodes du Builder.</p>
+            <pre><code>public class Lecteur {
+    private PushbackReader buffer;
+    private Fabriquant fabriquant = new Fabriquant();
+
+    public Partie construire() throws IOException {
+        int car;
+        while ((car = buffer.read()) != -1) {
+            if (car == '(') {
+                // Construction d'un groupe
+                fabriquant.construireGroupe();
+            } else if (car == ')') {
+                // Fermeture d'un groupe
+                fabriquant.fermerGroupe();
+            } else if (Character.isDigit((char) car)) {
+                // Construction d'une valeur
+                int nombre = // ... parsing du nombre
+                fabriquant.construireValeur(nombre);
+            }
+        }
+        return fabriquant.getResultat();
+    }
+}</code></pre>
+
+            <h4>2. Le ConcreteBuilder (Fabriquant)</h4>
+            <p>Il construit progressivement la structure composite en utilisant une Pile pour gérer la hiérarchie.</p>
+            <pre><code>public class Fabriquant {
+    private Pile pile = new PileImpl();
+    private Partie resultat;
+    private int niveau = 0;
+
+    // Méthode de construction : crée un nouveau groupe
+    public void construireGroupe() {
+        if (!pile.estVide()) {
+            Groupe sommet = (Groupe) pile.pop();
+            Groupe nouveau = new Groupe(..., ++niveau);
+            sommet.add(nouveau);
+            pile.push(sommet);
+            pile.push(nouveau);
+        } else {
+            Groupe nouveau = new Groupe(..., 0);
+            pile.push(nouveau);
+            resultat = nouveau;
+        }
+    }
+
+    // Méthode de construction : ferme le groupe courant
+    public void fermerGroupe() {
+        pile.pop();
+        niveau--;
+    }
+
+    // Méthode de construction : ajoute une valeur
+    public void construireValeur(int nombre) {
+        Valeur number = new Valeur(nombre, niveau + 1);
+        if (!pile.estVide()) {
+            Groupe sommet = (Groupe) pile.pop();
+            sommet.add(number);
+            pile.push(sommet);
+        } else {
+            resultat = number;
+        }
+    }
+
+    // Récupération du produit final
+    public Partie getResultat() {
+        return resultat;
+    }
+}</code></pre>
+
+            <h4>3. Le Product (Partie)</h4>
+            <p>Le produit complexe résultant : une structure composite hiérarchique.</p>
+            <pre><code>public interface Partie {
+    void demande(Traitement traitement);
+    int getNiveau();
+}
+
+// Peut être un Groupe (composite) ou une Valeur (leaf)</code></pre>
+
+            <h4>4. Structure auxiliaire : La Pile</h4>
+            <p>Le Builder utilise une <code>Pile</code> pour gérer les groupes imbriqués pendant la construction.</p>
+            <pre><code>public interface Pile {
+    boolean estVide();
+    void push(Object n);
+    Object pop();
+    Object sommet();
+}</code></pre>
+
+            <hr>
+
+            <h2 id="composite">🌳 PATTERN 2 : COMPOSITE</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Une interface commune pour les feuilles (objets simples) et les conteneurs (groupes).</li>
+                    <li>✅ La classe conteneur (Composite) contient une liste de l'interface commune.</li>
+                    <li>✅ On peut traiter un groupe comme un objet unique (Uniformité).</li>
+                    <li>✅ Structure en <strong>arbre</strong>.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Composite car <code>Groupe</code> implémente <code>Partie</code> et contient une liste de <code>Partie</code>. Il traite les groupes et les valeurs de la même façon."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Composite.png" alt="Diagramme Composite Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Composite.png" alt="Diagramme UML du pattern Composite (Exercice 5C)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Composite (Exercice 5C)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Component</strong><br>(Interface Commune)</td>
+                        <td><code>Partie</code></td>
+                        <td>Définit les opérations communes (<code>demande</code>, <code>getNiveau</code>) pour les feuilles et les composites.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Leaf</strong><br>(Feuille)</td>
+                        <td><code>Valeur</code></td>
+                        <td>Représente les objets de base qui n'ont pas d'enfants.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Composite</strong><br>(Conteneur)</td>
+                        <td><code>Groupe</code></td>
+                        <td>Stocke les enfants (<code>Vector parties</code>) et implémente les opérations en les déléguant souvent aux enfants.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Operation()</strong><br>(Méthode métier)</td>
+                        <td><code>demande(Traitement t)</code></td>
+                        <td>La méthode commune appelée uniformément sur l'arbre.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure expliquée)</h3>
+
+            <h4>1. L'Interface Component (Partie)</h4>
+            <p>C'est le contrat que tout le monde doit respecter. Elle permet de traiter les feuilles et les groupes de la même manière.</p>
+            <pre><code>public interface Partie {
+    // Opération métier commune
+    void demande(Traitement traitement);
+    int getNiveau();
+}</code></pre>
+
+            <h4>2. Le Composite (Groupe)</h4>
+            <p>C'est l'élément complexe. Il <strong>contient</strong> d'autres composants (sa liste d'enfants).</p>
+            <pre><code>public class Groupe implements Partie {
+    // 1. La collection d'enfants (COMPOSITION)
+    // Elle est du type de l'interface 'Partie', donc elle peut contenir
+    // des Valeurs OU d'autres Groupes (récursivité).
+    private Vector parties = new Vector();
+    
+    // 2. Méthode de gestion des enfants (spécifique au Composite)
+    public void add(Partie nouveau) {
+        parties.add(nouveau);
+    }
+
+    // 3. Implémentation de l'opération commune
+    // Ici, le Groupe se passe lui-même au traitement (voir Visitor)
+    public void demande(Traitement traitement) {
+        traitement.traiteGroupe(this);
+    }
+}</code></pre>
+
+            <h4>3. La Leaf (Valeur)</h4>
+            <p>C'est l'élément simple. Il n'a pas de sous-éléments.</p>
+            <pre><code>public class Valeur implements Partie {
+    private int nombre;
+
+    public Valeur(int nombre, int niveau) {
+        this.nombre = nombre;
+    }
+
+    // Pas de liste d'enfants, pas de méthode add() !
+    
+    public void demande(Traitement traitement) {
+        traitement.traiteValeur(this);
+    }
+}</code></pre>
+
+
+            <hr>
+
+            <h2 id="visitor">🕵️ PATTERN 3 : VISITOR</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ On veut ajouter des opérations (calculer total, afficher) sans modifier les classes de la structure.</li>
+                    <li>✅ Une interface <code>Visitor</code> avec des méthodes <code>visitConcretA()</code>, <code>visitConcretB()</code>.</li>
+                    <li>✅ Une méthode <code>accept(Visitor)</code> dans les éléments de la structure.</li>
+                    <li>✅ Mécanisme de <strong>Double Dispatch</strong> (l'objet rappelle le visiteur en lui donnant son type réel).</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Visitor grâce à l'interface <code>Traitement</code> et la méthode <code>demande(Traitement)</code> qui effectue le double dispatch."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Visitor.png" alt="Diagramme Visitor Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Visitor.png" alt="Diagramme UML du pattern Visitor (Exercice 5C)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                
+                <figcaption>Figure : Diagramme UML du pattern Visitor (Exercice 5C)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Visitor</strong><br>(Interface Visiteur)</td>
+                        <td><code>Traitement</code></td>
+                        <td>Définit les signatures de visite pour chaque type concret d'élément (<code>traiteValeur</code>, <code>traiteGroupe</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteVisitor</strong><br>(Visiteur Concret)</td>
+                        <td><code>Totaliseur</code><br><code>Listeur</code></td>
+                        <td>Implémente l'algorithme spécifique (ex: sommer les valeurs, afficher le texte).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Element</strong><br>(Interface visitable)</td>
+                        <td><code>Partie</code></td>
+                        <td>Définit la méthode <code>accept</code> (ici <code>demande</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>accept()</strong></td>
+                        <td><code>demande(Traitement)</code></td>
+                        <td>La porte d'entrée pour le visiteur.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure expliquée)</h3>
+
+            <h4>1. L'interface Visitor (Traitement)</h4>
+            <pre><code>public interface Traitement {
+    // Une méthode par type concret à visiter
+    // C'est ici qu'on gère le "Double Dispatch"
+    void traiteValeur(Valeur unique);
+    void traiteGroupe(Groupe plusieurs);
+}</code></pre>
+
+            <h4>2. Le Concrete Visitor (Totaliseur)</h4>
+            <p>Contient la logique métier (calculer la somme) séparée de la structure de données.</p>
+            <pre><code>public class Totaliseur implements Traitement {
+    private int sommeDesValeurs = 0;
+
+    // Logique pour une Valeur
+    public void traiteValeur(Valeur valeur) {
+        sommeDesValeurs += valeur.getValeur();
+    }
+
+    // Logique pour un Groupe
+    public void traiteGroupe(Groupe groupe) {
+        // Le visiteur est responsable de parcourir les enfants si nécessaire
+        Iterator it = groupe.getParties();
+        while (it.hasNext()) {
+            Partie p = (Partie) it.next();
+            // On repasse le visiteur (this) aux enfants
+            p.demande(this); 
+        }
+    }
+}</code></pre>
+
+            <hr>
+
+            <h2 id="iterator">🔄 PATTERN 4 : ITERATOR</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Une méthode qui retourne un objet <code>Iterator</code> (ou similaire).</li>
+                    <li>✅ Permet de parcourir les éléments d'une collection sans exposer la structure interne.</li>
+                    <li>✅ L'itérateur fournit les méthodes <code>hasNext()</code> et <code>next()</code>.</li>
+                    <li>✅ Sépare la logique de parcours de la structure de données.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Iterator grâce à la méthode <code>getParties()</code> qui retourne un <code>Iterator</code> pour parcourir les éléments sans exposer le <code>Vector</code> interne."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Iterator.png" alt="Diagramme Iterator Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Iterator.png" alt="Diagramme UML du pattern Iterator (Exercice 5C)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Iterator (Exercice 5C)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Aggregate</strong><br>(Interface de collection)</td>
+                        <td><em>Interface implicite</em></td>
+                        <td>Définit la méthode pour créer un itérateur (ici implémentée directement dans Groupe).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteAggregate</strong><br>(Collection concrète)</td>
+                        <td><code>Groupe</code></td>
+                        <td>Contient la collection réelle (<code>Vector parties</code>) et fournit un itérateur via <code>getParties()</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Iterator</strong><br>(Interface d'itération)</td>
+                        <td><code>Iterator</code> (Java)</td>
+                        <td>Interface standard Java avec <code>hasNext()</code> et <code>next()</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteIterator</strong><br>(Itérateur concret)</td>
+                        <td><code>Collections.unmodifiableList().iterator()</code></td>
+                        <td>Itérateur créé automatiquement par Java, empêche les modifications pendant le parcours.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure expliquée)</h3>
+
+            <h4>1. Le ConcreteAggregate (Groupe)</h4>
+            <p>La classe qui contient la collection et fournit l'itérateur.</p>
+            <pre><code>public class Groupe implements Partie {
+    // La collection interne (cachée de l'extérieur)
+    private Vector parties = new Vector();
+
+    // Méthode qui retourne un itérateur
+    public Iterator getParties() {
+        // Crée un itérateur en lecture seule
+        return Collections.unmodifiableList(parties).iterator();
+    }
+
+    // Méthode pour ajouter des éléments
+    public void add(Partie nouveau) {
+        parties.add(nouveau);
+    }
+}</code></pre>
+
+            <h4>2. Utilisation de l'Iterator</h4>
+            <p>Exemple d'utilisation dans les visiteurs (Totaliseur, Listeur) :</p>
+            <pre><code>public void traiteGroupe(Groupe groupe) {
+    // Récupère l'itérateur
+    Iterator it = groupe.getParties();
+    
+    // Parcourt les éléments
+    while (it.hasNext()) {
+        Partie p = (Partie) it.next();
+        p.demande(this);
+    }
+}</code></pre>
+
+            <h4>3. Avantages</h4>
+            <ul>
+                <li>🔒 <strong>Encapsulation</strong> : Le <code>Vector</code> interne reste privé</li>
+                <li>🛡️ <strong>Protection</strong> : <code>unmodifiableList()</code> empêche les modifications</li>
+                <li>🔄 <strong>Standardisation</strong> : Utilise l'interface <code>Iterator</code> standard de Java</li>
+                <li>🎯 <strong>Simplicité</strong> : Interface uniforme pour parcourir n'importe quelle collection</li>
+            </ul>
+
+            <hr>
+
+            <h2 id="strategy">🎯 PATTERN 5 : STRATEGY</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Une interface qui définit une famille d'algorithmes interchangeables.</li>
+                    <li>✅ Le contexte délègue l'exécution à une stratégie passée en paramètre.</li>
+                    <li>✅ Permet de changer l'algorithme dynamiquement sans modifier le contexte.</li>
+                    <li>✅ Évite les multiples <code>if/else</code> ou <code>switch</code> pour choisir un comportement.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Strategy car <code>Partie</code> (Context) délègue le traitement à <code>Traitement</code> (Strategy) passé en paramètre dans <code>demande()</code>."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/strategy.png" alt="Diagramme Strategy Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Strategie.png" alt="Diagramme UML du pattern Strategy (Exercice 5C)" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Strategy (Exercice 5C)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Context</strong><br>(Contexte)</td>
+                        <td><code>Partie</code><br>(Valeur, Groupe)</td>
+                        <td>Délègue l'exécution à la stratégie reçue via <code>demande(Traitement)</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Strategy</strong><br>(Interface de stratégie)</td>
+                        <td><code>Traitement</code></td>
+                        <td>Définit l'interface commune pour tous les algorithmes de traitement.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteStrategyA</strong></td>
+                        <td><code>Totaliseur</code></td>
+                        <td>Implémente l'algorithme de calcul (somme, moyenne, comptage).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteStrategyB</strong></td>
+                        <td><code>Listeur</code></td>
+                        <td>Implémente l'algorithme d'affichage simple.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteStrategyC</strong></td>
+                        <td><code>ListeurNom</code></td>
+                        <td>Implémente l'algorithme d'affichage avec noms de groupes.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code principal (structure expliquée)</h3>
+
+            <h4>1. Le Context (Partie)</h4>
+            <p>L'interface qui accepte différentes stratégies de traitement.</p>
+            <pre><code>public interface Partie {
+    // Méthode qui accepte une stratégie
+    void demande(Traitement traitement);
+    int getNiveau();
+}</code></pre>
+
+            <h4>2. Implémentations concrètes du Context</h4>
+            <p><strong>Valeur</strong> (ConcreteContext) :</p>
+            <pre><code>public class Valeur implements Partie {
+    private int nombre;
+
+    public void demande(Traitement traitement) {
+        // Délègue à la stratégie
+        traitement.traiteValeur(this);
+    }
+}</code></pre>
+
+            <p><strong>Groupe</strong> (ConcreteContext) :</p>
+            <pre><code>public class Groupe implements Partie {
+    private Vector parties = new Vector();
+
+    public void demande(Traitement traitement) {
+        // Délègue à la stratégie
+        traitement.traiteGroupe(this);
+    }
+}</code></pre>
+
+            <h4>3. L'interface Strategy (Traitement)</h4>
+            <p>Définit les méthodes que toutes les stratégies doivent implémenter.</p>
+            <pre><code>public interface Traitement {
+    void traiteValeur(Valeur unique);
+    void traiteGroupe(Groupe plusieurs);
+}</code></pre>
+
+            <h4>4. Les ConcreteStrategy</h4>
+            
+            <p><strong>Totaliseur</strong> - Stratégie de calcul :</p>
+            <pre><code>public class Totaliseur implements Traitement {
+    private int sommeDesValeurs = 0;
+    private int nombreDeValeurs = 0;
+
+    public void traiteValeur(Valeur valeur) {
+        nombreDeValeurs++;
+        sommeDesValeurs += valeur.getValeur();
+    }
+
+    public void traiteGroupe(Groupe groupe) {
+        Iterator it = groupe.getParties();
+        while (it.hasNext()) {
+            Partie p = (Partie) it.next();
+            p.demande(this); // Propagation récursive
+        }
+    }
+}</code></pre>
+
+            <p><strong>Listeur</strong> - Stratégie d'affichage simple :</p>
+            <pre><code>public class Listeur implements Traitement {
+    public void traiteValeur(Valeur valeur) {
+        System.out.print(valeur.getValeur() + " ");
+    }
+
+    public void traiteGroupe(Groupe groupe) {
+        System.out.print("( ");
+        Iterator it = groupe.getParties();
+        while (it.hasNext()) {
+            Partie p = (Partie) it.next();
+            p.demande(this);
+        }
+        System.out.print(") ");
+    }
+}</code></pre>
+
+            <h4>5. Utilisation dynamique des stratégies</h4>
+            <pre><code>// Dans Main.java
+Partie partie = lecteur.construire();
+
+// On change de stratégie dynamiquement
+partie.demande(new Listeur());      // Affichage simple
+partie.demande(new Totaliseur());   // Calculs
+partie.demande(new ListeurNom());   // Affichage avec noms</code></pre>
+
+            <h3>🔄 Strategy vs Visitor</h3>
+            <div style="background-color: #e7f3ff; border: 1px solid #0066cc; padding: 15px; margin: 20px 0;">
+                <p><strong>Dans cet exercice, Strategy et Visitor sont combinés !</strong></p>
+                <ul>
+                    <li><strong>Aspect Strategy :</strong> La méthode <code>demande()</code> accepte différentes stratégies de traitement interchangeables.</li>
+                    <li><strong>Aspect Visitor :</strong> Le double dispatch permet d'exécuter la bonne méthode selon le type réel (Valeur ou Groupe).</li>
+                </ul>
+                <p>💡 <strong>En résumé :</strong> <code>demande(Traitement)</code> est à la fois <code>accept(Visitor)</code> et <code>executeStrategy(Strategy)</code> !</p>
+            </div>
+
+            <hr>
+
+            <h2>💡 Conseils Supplémentaires</h2>
+
+            <h3>⚠️ Pièges à éviter</h3>
+
+            <div style="background-color: #fff3cd; border: 1px solid #856404; padding: 15px; margin: 20px 0;">
+                <h4>Composite vs Decorator</h4>
+                <ul>
+                    <li><strong>Composite :</strong> Relation 1-N (Arbre). Le conteneur a une liste d'enfants. Uniformité.</li>
+                    <li><strong>Decorator :</strong> Relation 1-1 (Enveloppe). Ajoute du comportement dynamiquement.</li>
+                </ul>
+
+                <h4>Visitor vs Strategy</h4>
+                <ul>
+                    <li><strong>Visitor :</strong> Focus sur le <strong>double dispatch</strong> pour exécuter la bonne opération selon le type réel.</li>
+                    <li><strong>Strategy :</strong> Focus sur le <strong>changement d'algorithme</strong> de manière interchangeable.</li>
+                    <li><strong>Dans cet exercice :</strong> Les deux patterns sont combinés dans <code>demande(Traitement)</code> !</li>
+                </ul>
+
+                <h4>Visitor vs Iterator</h4>
+                <ul>
+                    <li><strong>Iterator :</strong> Sert juste à <strong>parcourir</strong> la structure séquentiellement.</li>
+                    <li><strong>Visitor :</strong> Sert à <strong>exécuter une opération</strong> différente selon le type réel de l'objet.</li>
+                </ul>
+            </div>
+            
+            <h3>💡 Récapitulatif</h3>
+            <p>Dans cet exercice, <strong>cinq patterns</strong> travaillent ensemble :</p>
+            <ul>
+                <li><strong>Builder</strong> : Construit progressivement la structure lors de la lecture du fichier</li>
+                <li><strong>Composite</strong> : Organise la structure en arbre (Groupe et Valeur)</li>
+                <li><strong>Visitor</strong> : Permet d'ajouter des opérations sans modifier la structure (double dispatch)</li>
+                <li><strong>Iterator</strong> : Permet de parcourir les éléments sans exposer leur implémentation interne</li>
+                <li><strong>Strategy</strong> : Permet de changer dynamiquement l'algorithme de traitement (Totaliseur, Listeur, ListeurNom)</li>
+            </ul>
+            <p><em>Note : Strategy et Visitor se combinent dans la méthode <code>demande(Traitement)</code> !</em></p>
+
+        </main>
+
+        <footer>
+            <p>© 2024 Design Patterns Course</p>
+        </footer>
+    </div>
+</body>
+</html>

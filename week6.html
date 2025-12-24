@@ -3,30 +3,695 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semaine 6 - Reconnaissance Patterns (Fiche 2)</title>
+    <title>Semaine 6 - Jeu de la Vie</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .comparison-table thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            border: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+        .comparison-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .comparison-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Semaine 6</h1>
-            <p>Reconnaissance de patterns - Fiche 2</p>
+            <p>Jeu de la Vie - Design Patterns</p>
         </header>
+
         <nav>
             <a href="index.html">Accueil</a>
             <a href="theory.html">Théorie</a>
         </nav>
+
         <main>
-            <h2>Reconnaissance de 5 patterns (Fiche 2)</h2>
-            <ul>
-                <li>Pattern 1</li>
-                <li>Pattern 2</li>
-                <li>Pattern 3</li>
-                <li>Pattern 4</li>
-                <li>Pattern 5</li>
-            </ul>
-            <p>Pour chaque pattern, identifiez le diagramme ou le code associé.</p>
+
+            <h2 id="state">🔄 PATTERN 1 : STATE</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Un objet change de comportement quand son état interne change.</li>
+                    <li>✅ Le contexte délègue les requêtes à un objet State.</li>
+                    <li>✅ Les transitions d'état sont gérées par les états eux-mêmes.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais State car <code>Cellule</code> (Context) délègue à <code>Situation</code> (State) qui peut être <code>EstVivante</code> ou <code>EstMorte</code>."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/State.png" alt="Diagramme State Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/State.png" alt="Diagramme UML du pattern State" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern State (Jeu de la Vie)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Context</strong></td>
+                        <td><code>Cellule</code></td>
+                        <td>Maintient une référence vers l'état actuel et délègue les opérations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>State</strong></td>
+                        <td><code>Situation</code></td>
+                        <td>Interface/classe abstraite pour tous les états.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteStateA</strong></td>
+                        <td><code>EstVivante</code></td>
+                        <td>Comportement d'une cellule vivante.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteStateB</strong></td>
+                        <td><code>EstMorte</code></td>
+                        <td>Comportement d'une cellule morte.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code de base</h3>
+            
+            <p><strong>Context (Cellule) :</strong> Délègue à l'état et change d'état selon le résultat.</p>
+            <pre><code>public class Cellule {
+    private Situation situation; // État actuel
+
+    public void vit() {
+        situation = situation.vit(); // Transition d'état
+    }
+
+    public void meurt() {
+        situation = situation.meurt();
+    }
+
+    public boolean estVivante() {
+        return situation.estVivante(); // Délégation simple
+    }
+}</code></pre>
+
+            <p><strong>ConcreteState (EstVivante) :</strong> Gère les transitions et le comportement.</p>
+            <pre><code>public class EstVivante extends Situation {
+    private static EstVivante instance = null;
+
+    public static EstVivante getInstance() {
+        if (instance == null) instance = new EstVivante();
+        return instance;
+    }
+
+    public Situation vit() {
+        return this; // Reste vivante
+    }
+
+    public Situation meurt() {
+        return EstMorte.getInstance(); // Transition vers morte
+    }
+
+    public boolean estVivante() {
+        return true;
+    }
+}</code></pre>
+
+            <p><strong>ConcreteState (EstMorte) :</strong> Transitions inverses.</p>
+            <pre><code>public class EstMorte extends Situation {
+    private static EstMorte instance = null;
+
+    public static EstMorte getInstance() {
+        if (instance == null) instance = new EstMorte();
+        return instance;
+    }
+
+    public Situation vit() {
+        return EstVivante.getInstance(); // Transition vers vivante
+    }
+
+    public Situation meurt() {
+        return this; // Reste morte
+    }
+
+    public boolean estVivante() {
+        return false;
+    }
+}</code></pre>
+
+            <hr>
+
+            <h2 id="singleton">🔒 PATTERN 2 : SINGLETON</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Une seule instance de la classe dans toute l'application.</li>
+                    <li>✅ Constructeur privé pour empêcher l'instanciation directe.</li>
+                    <li>✅ Méthode statique <code>getInstance()</code> pour obtenir l'instance.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Singleton car <code>EstVivante</code> et <code>EstMorte</code> ont un constructeur privé et une méthode <code>getInstance()</code>."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Singleton.png" alt="Diagramme Singleton Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/SingletonExos.png" alt="Diagramme UML du pattern Singleton" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Singleton (Jeu de la Vie)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Singleton</strong></td>
+                        <td><code>EstVivante</code>, <code>EstMorte</code></td>
+                        <td>Classes avec une seule instance partagée.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>getInstance()</strong></td>
+                        <td><code>getInstance()</code></td>
+                        <td>Retourne l'instance unique, la crée si nécessaire.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code de base</h3>
+            
+            <p><strong>Singleton (EstVivante) :</strong> Une seule instance pour toutes les cellules vivantes.</p>
+            <pre><code>public class EstVivante extends Situation {
+    private static EstVivante instance = null; // Instance unique
+
+    private EstVivante() {} // Constructeur privé
+
+    public static EstVivante getInstance() {
+        if (instance == null)
+            instance = new EstVivante();
+        return instance;
+    }
+}</code></pre>
+
+            <hr>
+
+            <h2 id="observer">👁️ PATTERN 3 : OBSERVER</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Un sujet notifie automatiquement plusieurs observateurs.</li>
+                    <li>✅ Méthodes <code>attach()</code>, <code>detach()</code>, <code>notify()</code>.</li>
+                    <li>✅ Les observateurs implémentent une méthode <code>update()</code>.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Observer car <code>JeuDeLaVie</code> (Subject) notifie <code>Espion</code> (Observer) via <code>prévenirEspions()</code>."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/observer.png" alt="Diagramme Observer Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/Observer6.png" alt="Diagramme UML du pattern Observer" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Observer (Jeu de la Vie)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Subject</strong></td>
+                        <td><code>JeuDeLaVie</code></td>
+                        <td>Maintient une liste d'observateurs et les notifie.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Observer</strong></td>
+                        <td><code>Espion</code></td>
+                        <td>Interface pour les observateurs.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteObserver</strong></td>
+                        <td><code>JeuDeLaVieGUI</code></td>
+                        <td>Implémente l'interface et réagit aux notifications.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>attach()</strong></td>
+                        <td><code>attacher()</code></td>
+                        <td>Enregistre un observateur.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>detach()</strong></td>
+                        <td><code>détacher()</code></td>
+                        <td>Supprime un observateur.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>notify()</strong></td>
+                        <td><code>prévenirEspions()</code></td>
+                        <td>Notifie tous les observateurs.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>update()</strong></td>
+                        <td><code>utiliserRenseignements()</code></td>
+                        <td>Appelée quand le sujet change.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code de base</h3>
+            
+            <p><strong>Subject (JeuDeLaVie) :</strong> Gère les observateurs et les notifie.</p>
+            <pre><code>public class JeuDeLaVie {
+    private List<Espion> espions;
+
+    public void attacher(Espion espion) {
+        this.espions.add(espion);
+    }
+
+    public void détacher(Espion espion) {
+        this.espions.remove(espion);
+    }
+
+    public void prévenirEspions() {
+        for (Espion espion : espions)
+            espion.utiliserRenseignements();
+    }
+}</code></pre>
+
+            <p><strong>Observer (Espion) :</strong> Interface pour les observateurs.</p>
+            <pre><code>public interface Espion {
+    void utiliserRenseignements();
+}</code></pre>
+
+            <p><strong>ConcreteObserver (JeuDeLaVieGUI) :</strong> Réagit aux notifications.</p>
+            <pre><code>public class JeuDeLaVieGUI implements Espion {
+    public void utiliserRenseignements() {
+        repaint(); // Redessine l'interface
+    }
+}</code></pre>
+
+            <hr>
+
+            <h2 id="visitor">🕵️ PATTERN 4 : VISITOR</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Ajoute des opérations sans modifier les classes visitées.</li>
+                    <li>✅ Méthode <code>accept(Visitor)</code> dans les éléments.</li>
+                    <li>✅ Méthodes <code>visit()</code> spécifiques pour chaque type.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Visitor car <code>Cellule</code> accepte <code>Parcourir</code> via <code>generer()</code> qui appelle <code>parcourtCelluleVivante/Morte()</code>."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/Visitor.png" alt="Diagramme Visitor Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/VisitorEXo.png" alt="Diagramme UML du pattern Visitor" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Visitor (Jeu de la Vie)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Visitor</strong></td>
+                        <td><code>Parcourir</code></td>
+                        <td>Interface abstraite pour les visiteurs.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteVisitor</strong></td>
+                        <td><code>ParcourtNormal</code>, <code>ParcourtFort</code></td>
+                        <td>Implémentent les règles du jeu.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Element</strong></td>
+                        <td><code>Cellule</code></td>
+                        <td>Accepte les visiteurs.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>accept()</strong></td>
+                        <td><code>generer()</code></td>
+                        <td>Délègue au visiteur selon l'état.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>visit()</strong></td>
+                        <td><code>parcourtCelluleVivante()</code>, <code>parcourtCelluleMorte()</code></td>
+                        <td>Traite chaque type de cellule.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code de base</h3>
+            
+            <p><strong>Visitor (Parcourir) :</strong> Définit les méthodes de visite.</p>
+            <pre><code>public abstract class Parcourir {
+    public abstract void parcourtCelluleVivante(Cellule cellule, 
+                                                JeuDeLaVie jeu, 
+                                                List<Activite> activites);
+    public abstract void parcourtCelluleMorte(Cellule cellule, 
+                                              JeuDeLaVie jeu, 
+                                              List<Activite> activites);
+}</code></pre>
+
+            <p><strong>ConcreteVisitor (ParcourtNormal) :</strong> Règles standard.</p>
+            <pre><code>public class ParcourtNormal extends Parcourir {
+    public void parcourtCelluleVivante(Cellule cellule, JeuDeLaVie jeu, 
+                                       List<Activite> activites) {
+        int n = cellule.nombreDeVoisins(jeu);
+        if (n != 2 && n != 3) {
+            activites.add(new Meurt(cellule));
+        }
+    }
+
+    public void parcourtCelluleMorte(Cellule cellule, JeuDeLaVie jeu, 
+                                     List<Activite> activites) {
+        int n = cellule.nombreDeVoisins(jeu);
+        if (n == 3) {
+            activites.add(new Vit(cellule));
+        }
+    }
+}</code></pre>
+
+            <p><strong>Element (via Situation) :</strong> Délègue au visiteur.</p>
+            <pre><code>// Dans EstVivante
+public void generer(Cellule cellule, JeuDeLaVie jeu, 
+                    List<Activite> activites, Parcourir parcourt) {
+    parcourt.parcourtCelluleVivante(cellule, jeu, activites);
+}
+
+// Dans EstMorte
+public void generer(Cellule cellule, JeuDeLaVie jeu, 
+                    List<Activite> activites, Parcourir parcourt) {
+    parcourt.parcourtCelluleMorte(cellule, jeu, activites);
+}</code></pre>
+
+            <hr>
+
+            <h2 id="command">⚡ PATTERN 5 : COMMAND</h2>
+
+            <h3>✅ Comment le reconnaître</h3>
+            <div style="background-color: #fafafa; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <p><strong>Trucs et astuces :</strong></p>
+                <ul>
+                    <li>✅ Encapsule une requête comme un objet.</li>
+                    <li>✅ Permet de paramétrer, mettre en file, annuler des opérations.</li>
+                    <li>✅ Sépare l'invocateur du receveur.</li>
+                </ul>
+                <p><strong>Phrase clé :</strong> "Je reconnais Command car <code>Activite</code> (Command) encapsule les actions <code>Vit</code> et <code>Meurt</code> exécutées par <code>Cellule</code> (Receiver)."</p>
+            </div>
+
+            <h3>📊 Schéma théorique</h3>
+            <img src="assets/th/CommandPatterns.png" alt="Diagramme Command Théorique" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+
+            <h3>🖼️ Schéma de l'exercice</h3>
+            <figure style="text-align:center;">
+                <img src="assets/exos/ConcreteCommandExo.png" alt="Diagramme UML du pattern Command" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                <figcaption>Figure : Diagramme UML du pattern Command (Jeu de la Vie)</figcaption>
+            </figure>
+
+            <h3>🔍 Correspondance Théorie / Exercice</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Participants théoriques</th>
+                        <th>Noms utilisés dans le code</th>
+                        <th>Explication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Command</strong></td>
+                        <td><code>Activite</code></td>
+                        <td>Interface abstraite pour les commandes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ConcreteCommand</strong></td>
+                        <td><code>Vit</code>, <code>Meurt</code></td>
+                        <td>Commandes concrètes qui encapsulent les actions.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Receiver</strong></td>
+                        <td><code>Cellule</code></td>
+                        <td>Objet qui exécute réellement l'action.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Invoker</strong></td>
+                        <td><code>JeuDeLaVie</code></td>
+                        <td>Stocke et exécute les commandes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>execute()</strong></td>
+                        <td><code>activer()</code></td>
+                        <td>Exécute la commande.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>💻 Code de base</h3>
+            
+            <p><strong>Command (Activite) :</strong> Interface abstraite.</p>
+            <pre><code>public abstract class Activite {
+    private Cellule cellule;
+
+    public Activite(Cellule cellule) {
+        this.cellule = cellule;
+    }
+
+    public abstract void activer(); // execute()
+    
+    public Cellule getCellule() {
+        return cellule;
+    }
+}</code></pre>
+
+            <p><strong>ConcreteCommand (Vit) :</strong> Commande pour faire vivre une cellule.</p>
+            <pre><code>public class Vit extends Activite {
+    public Vit(Cellule cellule) {
+        super(cellule);
+    }
+
+    public void activer() {
+        getCellule().vit(); // Appelle le Receiver
+    }
+}</code></pre>
+
+            <p><strong>ConcreteCommand (Meurt) :</strong> Commande pour tuer une cellule.</p>
+            <pre><code>public class Meurt extends Activite {
+    public Meurt(Cellule cellule) {
+        super(cellule);
+    }
+
+    public void activer() {
+        getCellule().meurt(); // Appelle le Receiver
+    }
+}</code></pre>
+
+            <p><strong>Invoker (JeuDeLaVie) :</strong> Stocke et exécute les commandes.</p>
+            <pre><code>public void avancer() {
+    ArrayList<Activite> activites = new ArrayList<Activite>();
+    
+    // Génère les commandes
+    for (int i = 0; i < lignes; i++)
+        for (int j = 0; j < colonnes; j++)
+            grille[i][j].generer(this, activites, parcourt);
+    
+    // Exécute toutes les commandes
+    for (Activite activité : activites)
+        activité.activer();
+}</code></pre>
+
+            <hr>
+
+            <hr>
+
+            <h2>💡 Conseils pour identifier les patterns</h2>
+
+            <h3>🎯 Comment reconnaître COMMAND ?</h3>
+            <div style="background-color: #e8f5e9; border: 2px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                <h4>Questions à se poser :</h4>
+                <ol>
+                    <li><strong>Est-ce qu'une ACTION devient un OBJET ?</strong>
+                        <pre><code>// Au lieu de : cellule.vit();
+// On fait : Activite action = new Vit(cellule);</code></pre>
+                    </li>
+                    <li><strong>Est-ce qu'on STOCKE les actions avant de les exécuter ?</strong>
+                        <pre><code>ArrayList<Activite> activites = new ArrayList<>();
+activites.add(new Meurt(cellule));</code></pre>
+                    </li>
+                    <li><strong>Y a-t-il une méthode execute() commune ?</strong>
+                        <pre><code>public abstract void activer(); // Le "execute()"</code></pre>
+                    </li>
+                    <li><strong>Exécution différée ?</strong>
+                        <pre><code>for (Activite act : activites) act.activer();</code></pre>
+                    </li>
+                </ol>
+                <p><strong>✅ Si OUI aux 4 → C'est COMMAND !</strong></p>
+            </div>
+
+            <h3>🔍 Comment reconnaître OBSERVER ?</h3>
+            <div style="background-color: #fff3e0; border: 2px solid #ff9800; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                <h4>Indices clairs :</h4>
+                <ul>
+                    <li>✅ Une liste d'observateurs : <code>List&lt;Espion&gt; espions</code></li>
+                    <li>✅ Méthodes <code>attach()</code> / <code>detach()</code></li>
+                    <li>✅ Méthode <code>notify()</code> qui parcourt les observateurs</li>
+                    <li>✅ Méthode <code>update()</code> dans les observateurs</li>
+                </ul>
+                <p><strong>💡 Astuce :</strong> Cherche les boucles <code>for (Observer o : observers)</code> !</p>
+            </div>
+
+            <h3>🔄 Comment reconnaître STATE ?</h3>
+            <div style="background-color: #e3f2fd; border: 2px solid #2196f3; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                <h4>Signes révélateurs :</h4>
+                <ul>
+                    <li>✅ Un attribut d'état : <code>private Situation situation;</code></li>
+                    <li>✅ Les méthodes retournent un nouvel état : <code>return EstMorte.getInstance();</code></li>
+                    <li>✅ Le contexte change d'état : <code>situation = situation.vit();</code></li>
+                    <li>✅ Évite les <code>if/else</code> sur l'état</li>
+                </ul>
+                <p><strong>💡 Question clé :</strong> "L'objet change-t-il de comportement selon son état interne ?"</p>
+            </div>
+
+            <h3>🕵️ Comment reconnaître VISITOR ?</h3>
+            <div style="background-color: #f3e5f5; border: 2px solid #9c27b0; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                <h4>Caractéristiques :</h4>
+                <ul>
+                    <li>✅ Méthode <code>accept(Visitor)</code> dans les éléments</li>
+                    <li>✅ Plusieurs méthodes <code>visit(TypeA)</code>, <code>visit(TypeB)</code></li>
+                    <li>✅ Double dispatch : l'élément rappelle le visiteur avec son type</li>
+                </ul>
+                <p><strong>⚠️ Attention :</strong> Visitor peut être une <code>abstract class</code>, pas forcément une <code>interface</code> !</p>
+            </div>
+
+            <h3>🔒 Comment reconnaître SINGLETON ?</h3>
+            <div style="background-color: #fce4ec; border: 2px solid #e91e63; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                <h4>C'est simple :</h4>
+                <ol>
+                    <li>✅ Constructeur <strong>privé</strong> : <code>private EstVivante() {}</code></li>
+                    <li>✅ Attribut statique : <code>private static EstVivante instance;</code></li>
+                    <li>✅ Méthode <code>getInstance()</code> statique</li>
+                </ol>
+                <p><strong>💡 En un coup d'œil :</strong> Si tu vois <code>private Constructor()</code> + <code>getInstance()</code> → Singleton !</p>
+            </div>
+
+            <h3>⚠️ Pièges à éviter</h3>
+            <div style="background-color: #ffebee; border: 2px solid #f44336; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                <h4>Command vs Strategy</h4>
+                <ul>
+                    <li><strong>Command :</strong> Encapsule une <strong>action</strong> (stockée et exécutée plus tard)</li>
+                    <li><strong>Strategy :</strong> Encapsule un <strong>algorithme</strong> (choisi et utilisé immédiatement)</li>
+                </ul>
+                
+                <h4>State vs Strategy</h4>
+                <ul>
+                    <li><strong>State :</strong> L'objet change d'état <strong>lui-même</strong> : <code>situation = situation.vit()</code></li>
+                    <li><strong>Strategy :</strong> Le client choisit la stratégie <strong>de l'extérieur</strong></li>
+                </ul>
+
+                <h4>Visitor vs Template Method</h4>
+                <ul>
+                    <li><strong>Visitor :</strong> Double dispatch + opérations externes</li>
+                    <li><strong>Template Method :</strong> Squelette d'algorithme + méthodes abstraites internes</li>
+                </ul>
+            </div>
+
+            <h3>🎓 Récapitulatif - Le test rapide</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Question clé</th>
+                        <th>Indice visuel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>State</strong></td>
+                        <td>Le comportement change selon l'état interne ?</td>
+                        <td><code>situation = situation.vit()</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Singleton</strong></td>
+                        <td>Une seule instance dans toute l'appli ?</td>
+                        <td><code>private Constructor() + getInstance()</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Observer</strong></td>
+                        <td>Notifier plusieurs objets automatiquement ?</td>
+                        <td><code>for (Observer o : observers) o.update()</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Visitor</strong></td>
+                        <td>Ajouter des opérations sans modifier les classes ?</td>
+                        <td><code>accept(visitor) + visitor.visit(this)</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Command</strong></td>
+                        <td>Transformer une action en objet stockable ?</td>
+                        <td><code>List&lt;Command&gt; + cmd.execute()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr>
+
         </main>
+
         <footer>
             <p>© 2024 Design Patterns Course</p>
         </footer>
