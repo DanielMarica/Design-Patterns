@@ -3,26 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semaine 4 - Design Patterns</title>
+    <title>Semaine 4 - Pattern State</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Semaine 4</h1>
-            <p>Exercices et théorie sur les Design Patterns</p>
+            <h1>Design Patterns en Java</h1>
+            <p>Bachelier Informatique 2022-2026</p>
         </header>
+
         <nav>
             <a href="index.html">Accueil</a>
-            <a href="theory.html">Théorie</a>
+            <a href="week1.html">Semaine 1</a>
+            <a href="week4.html">Semaine 4</a>
         </nav>
+
         <main>
-            <h2>Exercices de la semaine 4</h2>
-            <p>Complétez ici les exercices ou notes de la semaine 4.</p>
-            <p>Dani avait la flemme de faire le patterns State </p>
+            <h2>Semaine 4 : Pattern State</h2>
+
+            <div class="week-list">
+                <!-- Section Théorie -->
+                <div class="week-item">
+                    <h3>Théorie</h3>
+
+                    <h4>Comment le reconnaître ?</h4>
+                    <p>
+                        Je reconnais <strong>State</strong> grâce à un <strong>enum State</strong> ou des <strong>classes d'états</strong> 
+                        et une méthode <strong>setState()</strong>. L'objet délègue le comportement à son état actuel 
+                        via <code>state.methodName()</code>, et l'état peut changer dynamiquement durant l'exécution.
+                    </p>
+
+                    <h4>Définition</h4>
+                    <p>
+                        Le pattern <strong>State</strong> est un pattern comportemental qui permet à un objet de changer 
+                        son comportement lorsque son état interne change. Il apparaît comme si l'objet changeait de classe.
+                    </p>
+
+                    <h4>Diagramme UML du Pattern State</h4>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="assets/th/State.png" alt="Diagramme UML du Pattern State" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background-color: white;">
+                    </div>
+
+                    <h4>Composants du Pattern State</h4>
+                    <ul>
+                        <li><strong>Context</strong> : Maintient une référence à l'état actuel et délègue le comportement à cet état</li>
+                        <li><strong>State Interface/Enum</strong> : Définit les méthodes communes pour tous les états</li>
+                        <li><strong>Concrete States</strong> : Implémentent le comportement spécifique à chaque état</li>
+                    </ul>
+
+                    <h4>Quand utiliser State ?</h4>
+                    <ul>
+                        <li>Quand un objet a un comportement différent selon son état actuel</li>
+                        <li>Quand vous avez beaucoup de conditions if/else ou switch basées sur l'état</li>
+                        <li>Quand les transitions d'états sont complexes et doivent être encapsulées</li>
+                    </ul>
+                </div>
+
+                <!-- Section Correspondance Théorie/Exercice -->
+                <div class="week-item">
+                    <h3>📋 Correspondance Théorie ↔ Exercice</h3>
+
+                    <table>
+                        <tr>
+                            <th>Nom Théorique (Pattern)</th>
+                            <th>Nom dans l'Exercice</th>
+                            <th>Rôle</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Context</strong></td>
+                            <td><code>Bear</code></td>
+                            <td>Objet qui change de comportement selon son état</td>
+                        </tr>
+                        <tr>
+                            <td><strong>State (interface/enum)</strong></td>
+                            <td><code>enum State</code></td>
+                            <td>Définit les états possibles et leurs comportements</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ConcreteState</strong></td>
+                            <td><code>SLEEPING</code>, <code>NOTSLEEPING</code>, <code>ANGRY</code></td>
+                            <td>États concrets avec comportements spécifiques</td>
+                        </tr>
+                        <tr>
+                            <td><strong>setState()</strong></td>
+                            <td><code>setState(State state)</code></td>
+                            <td>Changer l'état du contexte</td>
+                        </tr>
+                        <tr>
+                            <td><strong>state.handle()</strong></td>
+                            <td><code>state.attack()</code>, <code>state.sleep()</code></td>
+                            <td>Déléguer le comportement à l'état actuel</td>
+                        </tr>
+                        <tr>
+                            <td><strong>transition()</strong></td>
+                            <td><code>sleep()</code>, <code>wakeup()</code>, <code>angry()</code></td>
+                            <td>Méthodes de transition entre états</td>
+                        </tr>
+                    </table>
+
+                    <p style="margin-top: 15px;">
+                        <strong>💡 Point clé :</strong> Dans cet exercice, l'<code>enum State</code> combine 
+                        l'interface State et les ConcreteStates en une seule structure. Chaque valeur de l'enum 
+                        (<code>SLEEPING</code>, <code>NOTSLEEPING</code>, <code>ANGRY</code>) est un ConcreteState.
+                    </p>
+                </div>
+
+                <!-- Section Exercice -->
+                <div class="week-item">
+                    <h3>Exercice : L'Ours (Bear)</h3>
+                    <p><strong>Description :</strong> Implémentation du pattern State pour gérer les différents états d'un ours.</p>
+                    <p><strong>Pattern utilisé :</strong> State</p>
+
+                    <h4>Énoncé de l'Exercice</h4>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="assets/exos/StateExos.png" alt="Énoncé de l'exercice State" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background-color: white;">
+                    </div>
+
+                    </table>
+
+                    <h4>Code Principal</h4>
+                    <p>Copiez chaque bloc individuellement pour construire votre solution.</p>
+
+                    <pre><code>// CLASSE : Bear.java
+package be.vinci;
+
+public class Bear {
+
+    public enum State {
+        SLEEPING {
+            @Override
+            public void attack(Bear b) {
+                System.out.println("grrrr");
+            }
+
+            @Override
+            public void sleep(Bear b) {
+                throw new RuntimeException("Already sleeping");
+            }
+        },
+        NOTSLEEPING {
+            @Override
+            public void attack(Bear b) {
+                System.out.println("ROARRRR");
+            }
+
+            @Override
+            public void wakeup(Bear b) {
+                throw new RuntimeException("already wak up");
+            }
+        },
+        ANGRY {
+            @Override
+            public void attack(Bear b) {
+                System.out.println("MEGA ROARRRR !!!");
+            }
+
+            @Override
+            public void angry(Bear b) {
+                throw new RuntimeException("already angry");
+            }
+
+            // ANGRY peut se calmer via wakeup()
+            // On hérite de State.wakeup() qui change vers NOTSLEEPING
+        };
+
+        public abstract void attack(Bear b);
+
+        public void sleep(Bear b) {
+            b.setState(State.SLEEPING);
+        }
+
+        public void wakeup(Bear b) {
+            b.setState(State.NOTSLEEPING);
+        }
+
+        public void angry(Bear b) {
+            b.setState(State.ANGRY);
+        }
+    }
+
+    private State state;
+
+    public Bear() {
+        setState(State.NOTSLEEPING);
+    }
+
+    public void attack() {
+        state.attack(this);
+    }
+
+    public void sleep() {
+        state.sleep(this);
+    }
+
+    public void wakeup() {
+        state.wakeup(this);
+    }
+
+    public void angry() {
+        state.angry(this);
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public static void main(String[] args) {
+        Bear b = new Bear();
+
+        System.out.println("1. L'ours attaque (NOTSLEEPING):");
+        b.attack(); // → ROARRRR
+
+        System.out.println("\n2. L'ours dort:");
+        b.sleep(); // → Passe à SLEEPING
+
+        System.out.println("\n3. L'ours se réveille:");
+        b.wakeup(); // → Passe à NOTSLEEPING
+
+        System.out.println("\n4. L'ours attaque (NOTSLEEPING):");
+        b.attack(); // → ROARRRR
+
+        System.out.println("\n5. L'ours devient en colère:");
+        b.angry(); // → Passe à ANGRY
+
+        System.out.println("\n6. L'ours attaque (ANGRY):");
+        b.attack(); // → MEGA ROARRRR !!!
+
+        System.out.println("\n7. L'ours se calme (wakeup depuis ANGRY):");
+        b.wakeup(); // → Passe à NOTSLEEPING (se calme)
+
+        System.out.println("\n8. L'ours attaque (NOTSLEEPING):");
+        b.attack(); // → ROARRRR
+
+        System.out.println("\n9. L'ours dort:");
+        b.sleep(); // → Passe à SLEEPING
+    }
+}</code></pre>
+
+                    <h4>Résultat Attendu</h4>
+                    <pre><code>1. L'ours attaque (NOTSLEEPING):
+ROARRRR
+
+2. L'ours dort:
+
+3. L'ours se réveille:
+
+4. L'ours attaque (NOTSLEEPING):
+ROARRRR
+
+5. L'ours devient en colère:
+
+6. L'ours attaque (ANGRY):
+MEGA ROARRRR !!!
+
+7. L'ours se calme (wakeup depuis ANGRY):
+
+8. L'ours attaque (NOTSLEEPING):
+ROARRRR
+
+9. L'ours dort:</code></pre>
+                </div>
+
+                <!-- Section MEMO Technique -->
+                <div class="week-item">
+                    <h3>MEMO Technique : State vs Strategy</h3>
+
+                    <h4>State = CHANGEMENT d'état (Machine à états)</h4>
+                    <p>
+                        Imaginez un feu de circulation. Il change automatiquement d'état :
+                    </p>
+                    <ul>
+                        <li>🔴 Rouge → 🟢 Vert → 🟡 Jaune → 🔴 Rouge</li>
+                    </ul>
+                    <p>
+                        Chaque couleur (état) a son propre comportement, et le feu <strong>change d'état durant son fonctionnement</strong>.
+                    </p>
+                    <p>
+                        <strong>Dans le code :</strong> Le pattern State permet à un objet de changer son comportement 
+                        en fonction de son état interne. L'état peut changer plusieurs fois pendant la vie de l'objet.
+                    </p>
+
+                    <h4>Strategy = CHOIX unique (Sélection d'algorithme)</h4>
+                    <p>
+                        Imaginez que vous choisissez un mode de paiement en ligne :
+                    </p>
+                    <ul>
+                        <li>💳 Carte bancaire OU</li>
+                        <li>📱 PayPal OU</li>
+                        <li>🏦 Virement bancaire</li>
+                    </ul>
+                    <p>
+                        Vous choisissez UNE méthode au moment du paiement, et ce choix ne change pas pendant le processus.
+                    </p>
+                    <p>
+                        <strong>Dans le code :</strong> Le pattern Strategy sert à choisir <em>une seule façon</em> 
+                        de faire quelque chose à un moment donné, généralement définie au départ ou changée rarement.
+                    </p>
+
+                    <h4>Tableau Comparatif</h4>
+                    <table>
+                        <tr>
+                            <th>Pattern</th>
+                            <th>Mot-clé</th>
+                            <th>Changement</th>
+                            <th>Exemple</th>
+                        </tr>
+                        <tr>
+                            <td>State</td>
+                            <td>Transformer</td>
+                            <td>L'état change automatiquement pendant l'exécution</td>
+                            <td>Feu de circulation, Ours qui dort/se réveille</td>
+                        </tr>
+                        <tr>
+                            <td>Strategy</td>
+                            <td>Choisir</td>
+                            <td>On choisit une stratégie, elle reste fixe</td>
+                            <td>Mode de paiement, Algorithme de tri</td>
+                        </tr>
+                    </table>
+
+                    <h4>Pour l'Ours (Bear)</h4>
+                    <p>
+                        Dans notre exemple de l'ours, on utilise <strong>State</strong> car :
+                    </p>
+                    <ul>
+                        <li>L'ours change d'état plusieurs fois : NOTSLEEPING → SLEEPING → NOTSLEEPING → ANGRY</li>
+                        <li>Chaque état a un comportement différent pour <code>attack()</code></li>
+                        <li>Les transitions sont gérées par l'état lui-même</li>
+                    </ul>
+                </div>
+            </div>
         </main>
+
         <footer>
-            <p>© 2024 Design Patterns Course</p>
+            <p>&copy; 2025 Bachelier Informatique - Design Patterns</p>
         </footer>
     </div>
 </body>
