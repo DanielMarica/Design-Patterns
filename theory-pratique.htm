@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Reconnaître le pattern COMPOSITE en 30 secondes</title>
+	<link rel="stylesheet" href="style.css">
+	
+<head>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="container">
+		<h1>🎯 Reconnaître le pattern <span style="color:#2b7a78;font-weight:bold;">COMPOSITE</span> en 30 secondes</h1>
+		<img src="assets/exos/CompositeTH.png" alt="Diagramme Composite" style="display:block;margin:2em auto 1.5em auto;max-width:350px;width:100%;border-radius:8px;box-shadow:0 2px 8px #0002;">
+		<main>
+		<h2>3 signes distinctifs :</h2>
+		<ul style="margin:1.5em 0 1.5em 1.5em;">
+			<li><strong>1️⃣ Interface commune</strong><br>
+				Tous les objets (simples et complexes) implémentent la même interface<br>
+				<span style="color:#2b7a78;font-weight:bold;">Exemple :</span> <code>Produit</code>
+			</li>
+			<li><strong>2️⃣ Le Composite EST et CONTIENT</strong><br>
+				<span style="color:#2b7a78;font-weight:bold;">EST</span> : implémente l'interface (<code>Pack implements Produit</code>)<br>
+				<span style="color:#2b7a78;font-weight:bold;">CONTIENT</span> : a une <code>List</code> de cette interface (<code>List&lt;Produit&gt;</code>)
+			</li>
+			<li><strong>3️⃣ Délégation automatique</strong><br>
+				Le Composite délègue les opérations à ses enfants<br>
+				<span style="color:#2b7a78;font-weight:bold;">Exemple :</span> <code>Pack.getPrix()</code> → somme des prix de tous les produits contenus
+			</li>
+		</ul>
+		<div style="background:#e8f6f3;border-left:4px solid #2b7a78;padding:1em 1.2em;margin:1.5em 0;font-style:italic;font-size:1.1em;">
+			✅ <strong>Phrase clé pour identifier :</strong><br>
+			<q>Un objet qui implémente l'interface ET contient une liste de cette même interface</q>
+		</div>
+		<h2>📌 Signature visuelle dans le code :</h2>
+		<pre><code>class Pack implements Produit {        // ← EST un Produit
+	private List&lt;Produit&gt; produits;    // ← CONTIENT des Produits
+    
+	public double getPrix() {
+		return produits.stream()
+			.mapToDouble(Produit::getPrix)  // ← DÉLÈGUE
+			.sum();
+	}
+}</code></pre>
+		<p style="font-size:1.1em; text-align:center; margin-top:2em;">Si tu vois cette structure → <span style="color:#2b7a78;font-weight:bold;">c'est un Composite ! 🎯</span></p>
+		</main>
+	</div>
+</body>
+</html>
